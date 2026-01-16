@@ -27,15 +27,15 @@ const ThumbnailMaker = () => {
 
   /** 카테고리: 라벨(좌상단), 포인트색(점), 스티커 */
   const categories = {
-    "🎡 놀거리": { dot: "#E76F51", label: "놀거리노트", sticker: `${STICKER_BASE}/play.png` },
-    "☕ 카페":   { dot: "#8D6E63", label: "카페노트",   sticker: `${STICKER_BASE}/cafe2.png` },
-    "🍰 디저트": { dot: "#F4A261", label: "디저트일기", sticker: `${STICKER_BASE}/dessert.png` },
-    "💄 뷰티":   { dot: "#FF5C8A", label: "뷰티노트",   sticker: `${STICKER_BASE}/beauty2.png` },
-    "✈️ 여행":   { dot: "#457B9D", label: "여행기록",   sticker: `${STICKER_BASE}/travel.png` },
-    "📦 제품리뷰":{ dot: "#6C757D", label: "사용후기",   sticker: `${STICKER_BASE}/product.png` },
-    "🎭 연극":   { dot: "#6D597A", label: "공연기록",   sticker: `${STICKER_BASE}/theater.png` },
-    "🍜 음식":   { dot: "#D62828", label: "먹데이트",   sticker: `${STICKER_BASE}/food.png` },
-    "🎬 영화":   { dot: "#355070", label: "영화노트",   sticker: `${STICKER_BASE}/movie.png` },
+    "🎡 놀거리": { dot: "#E76F51", bg: "#FFF3EC", label: "놀거리노트", sticker: `${STICKER_BASE}/play.png` },
+    "☕ 카페":   { dot: "#8D6E63", bg: "#F7F1EA", label: "카페노트",   sticker: `${STICKER_BASE}/cafe2.png` },
+    "🍰 디저트": { dot: "#F4A261", bg: "#FFF6E8", label: "디저트일기", sticker: `${STICKER_BASE}/dessert.png` },
+    "💄 뷰티":   { dot: "#FF5C8A", bg: "#FFF0F6", label: "뷰티노트",   sticker: `${STICKER_BASE}/beauty2.png` },
+    "✈️ 여행":   { dot: "#457B9D", bg: "#EEF6FF", label: "여행기록",   sticker: `${STICKER_BASE}/travel.png` },
+    "📦 제품리뷰":{ dot: "#6C757D", bg: "#F3F4F6", label: "사용후기",   sticker: `${STICKER_BASE}/product.png` },
+    "🎭 연극":   { dot: "#6D597A", bg: "#F5F0FF", label: "공연기록",   sticker: `${STICKER_BASE}/theater.png` },
+    "🍜 음식":   { dot: "#D62828", bg: "#FFF0EE", label: "먹데이트",   sticker: `${STICKER_BASE}/food.png` },
+    "🎬 영화":   { dot: "#355070", bg: "#EEF1FF", label: "영화노트",   sticker: `${STICKER_BASE}/movie.png` },
   };
 
   const fonts = [
@@ -103,12 +103,12 @@ const ThumbnailMaker = () => {
 
     const style = categories[category];
 
-    // === 0) 전체 배경 (베이지 종이 느낌)
-    ctx.fillStyle = "#f2e8d8";
+    // === 0) 전체 배경 - 카테고리 별로 다르게
+    ctx.fillStyle = style.bg || "#f2e8d8";
     ctx.fillRect(0, 0, 1080, 1080);
 
     // === 1) 사진 영역: 둥근 프레임 안에 넣기 (첫 번째 사진 느낌)
-    const frameMargin = 70;
+    const frameMargin = 40;
     const frameX = frameMargin;
     const frameY = frameMargin;
     const frameW = 1080 - frameMargin * 2;
