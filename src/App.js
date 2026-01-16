@@ -13,7 +13,7 @@ const loadImg = (src) =>
 const ThumbnailMaker = () => {
   const [image, setImage] = useState(null);
   const [category, setCategory] = useState("🍜 음식");
-  const [title, setTitle] = useState("홍대 떡볶이 맛집\n모둠 즉떡 오성방앗간");
+  const [title, setTitle] = useState("");
   const [selectedFont, setSelectedFont] = useState("YPairing");
   const [result, setResult] = useState(null);
 
@@ -49,6 +49,10 @@ const ThumbnailMaker = () => {
     { name: "옹글잎 콩콩체", value: "OngleipKonkon" },
     { name: "학교안심 어항꾸미기", value: "SchoolSafetyAquariumDecor" },
     { name: "케리스케두 라인", value: "KerisKeduLine" },
+    { name: '온글잎 박다현체', value: 'OngleipParkDahyeon' },
+    { name: '밑미 폰트', value: 'MitmiFont' },
+    { name: '학교안심 별자리', value: 'SchoolSafetyConstellation' },
+    { name: '넥슨 배찌체', value: 'NexonBazzi' },
   ];
 
   const handleImageUpload = (e) => {
