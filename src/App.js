@@ -28,9 +28,9 @@ const ThumbnailMaker = () => {
   /** 카테고리: 라벨(좌상단), 포인트색(점), 스티커 */
   const categories = {
     "🎡 놀거리": { dot: "#E76F51", label: "놀거리노트", sticker: `${STICKER_BASE}/play.png` },
-    "☕ 카페":   { dot: "#8D6E63", label: "카페노트",   sticker: `${STICKER_BASE}/cafe.png` },
+    "☕ 카페":   { dot: "#8D6E63", label: "카페노트",   sticker: `${STICKER_BASE}/cafe2.png` },
     "🍰 디저트": { dot: "#F4A261", label: "디저트일기", sticker: `${STICKER_BASE}/dessert.png` },
-    "💄 뷰티":   { dot: "#FF5C8A", label: "뷰티노트",   sticker: `${STICKER_BASE}/beauty.png` },
+    "💄 뷰티":   { dot: "#FF5C8A", label: "뷰티노트",   sticker: `${STICKER_BASE}/beauty2.png` },
     "✈️ 여행":   { dot: "#457B9D", label: "여행기록",   sticker: `${STICKER_BASE}/travel.png` },
     "📦 제품리뷰":{ dot: "#6C757D", label: "사용후기",   sticker: `${STICKER_BASE}/product.png` },
     "🎭 연극":   { dot: "#6D597A", label: "공연기록",   sticker: `${STICKER_BASE}/theater.png` },
@@ -229,8 +229,8 @@ const ThumbnailMaker = () => {
         const sW = 190;
         const sH = 190;
 
-        const sX = cardX + cardW - sW - 30;
-        const sY = cardY - 20;
+        const sX = cardX + cardW - sW - 10;
+        const sY = cardY - 50;
 
         ctx.save();
         ctx.translate(sX + sW / 2, sY + sH / 2);
