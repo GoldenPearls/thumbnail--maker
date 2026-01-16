@@ -29,7 +29,7 @@ const ThumbnailMaker = () => {
   const categories = {
     "🎡 놀거리": { dot: "#E76F51", bg: "#FFF3EC", label: "놀거리노트", sticker: `${STICKER_BASE}/play.png` },
     "☕ 카페":   { dot: "#8D6E63", bg: "#F7F1EA", label: "카페노트",   sticker: `${STICKER_BASE}/cafe2.png` },
-    "🍰 디저트": { dot: "#F4A261", bg: "#FFF6E8", label: "디저트일기", sticker: `${STICKER_BASE}/dessert.png` },
+    "🍰 디저트":  { dot: "#E3A008", bg: "#FFF2CC", label: "디저트일기", sticker: `${STICKER_BASE}/dessert.png`},
     "💄 뷰티":   { dot: "#FF5C8A", bg: "#FFF0F6", label: "뷰티노트",   sticker: `${STICKER_BASE}/beauty2.png` },
     "✈️ 여행":   { dot: "#457B9D", bg: "#EEF6FF", label: "여행기록",   sticker: `${STICKER_BASE}/travel.png` },
     "📦 제품리뷰":{ dot: "#6C757D", bg: "#F3F4F6", label: "사용후기",   sticker: `${STICKER_BASE}/product.png` },
