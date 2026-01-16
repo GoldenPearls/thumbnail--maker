@@ -1,0 +1,218 @@
+/* 폰트 등록 */
+@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Nanum+Brush+Script&family=Gowun+Dodum&display=swap');
+
+/* Y페어링 폰트 (눈누) */
+@font-face {
+  font-family: 'YPairing';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-4@1.1/YPairingFont-Bd.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'KerisKeduLine';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2601-3@1.0/KERISKEDU_Line.woff2') format('woff2');
+  font-weight: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'NoonnuBasicGothic';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noon-2410@1.0/NoonnuBasicGothicRegular.woff2') format('woff2');
+  font-weight: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SchoolSafetyStarrySky';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimByeolbichhaneulTTF-L.woff2') format('woff2');
+  font-weight: 300;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SchoolSafetyStarrySky';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimByeolbichhaneulTTF-B.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'TtangsBudaeJjigae';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2212@1.0/TTTtangsbudaejjigaeL.woff2') format('woff2');
+  font-weight: 300;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'TtangsBudaeJjigae';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2212@1.0/TTTtangsbudaejjigaeM.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'TtangsBudaeJjigae';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2212@1.0/TTTtangsbudaejjigaeB.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SchoolSafetyAquariumDecor';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2508-2@1.0/HakgyoansimEohangkkumigiB.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'OngleipKonkon';
+  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/2412-1@1.0/Ownglyph_corncorn-Rg.woff2') format('woff2');
+  font-weight: normal;
+  font-display: swap;
+}
+
+/* 캔버스 폰트 미리 로딩용 */
+.font-preload {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  font-family: 'YPairing', 'Black Han Sans', 'Do Hyeon', 'Nanum Brush Script', 'Gowun Dodum';
+}
+
+body {
+  margin: 0;
+  padding: 40px 20px;
+  background: #f8f6f2;
+  font-family: 'Gowun Dodum', sans-serif;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+@media (max-width: 850px) {
+  .container { grid-template-columns: 1fr; }
+}
+
+.panel {
+  background: white;
+  padding: 30px;
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+
+.panel-title {
+  margin-top: 0;
+  font-size: 1.4rem;
+  color: #2f2b25;
+  margin-bottom: 22px;
+}
+
+.input-item { margin-bottom: 18px; }
+label {
+  display: block;
+  font-weight: 800;
+  margin-bottom: 8px;
+  color: #6b6257;
+}
+
+.file-box {
+  padding: 18px;
+  border: 2px dashed #d8d1c6;
+  border-radius: 16px;
+  text-align: center;
+  cursor: pointer;
+  color: #8a8074;
+  background: #fffdf9;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.cat-btn {
+  padding: 12px 10px;
+  border: 1px solid #e6dfd4;
+  border-radius: 14px;
+  background: #fffdf9;
+  cursor: pointer;
+  font-weight: 900;
+  color: #4a4036;
+}
+
+.cat-btn.active {
+  background: #3a2f24;
+  border-color: #3a2f24;
+  color: white;
+}
+
+.custom-select, .custom-textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid #e6dfd4;
+  font-family: inherit;
+  box-sizing: border-box;
+  background: #fffdf9;
+}
+
+.custom-textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.make-btn {
+  width: 100%;
+  padding: 15px;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 1.05rem;
+  font-weight: 900;
+  cursor: pointer;
+  margin-top: 6px;
+}
+
+.make-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.canvas-wrapper {
+  width: 100%;
+  aspect-ratio: 1/1;
+  background: #f1ece3;
+  border-radius: 22px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.result-img { width: 100%; height: 100%; object-fit: contain; }
+
+.placeholder-box {
+  color: #8a8074;
+  font-weight: 800;
+}
+
+.download-btn {
+  display: block;
+  width: 100%;
+  padding: 15px;
+  background: #2f2b25;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 16px;
+  font-weight: 900;
+  margin-top: 15px;
+}
