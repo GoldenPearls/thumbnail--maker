@@ -23,7 +23,7 @@ const ThumbnailMaker = () => {
   /**
    * 스티커 경로
    */
-  const STICKER_BASE = "./assets/stickers";
+  const STICKER_BASE = "./assets";
 
   /** 카테고리: 라벨(좌상단), 포인트색(점), 스티커 */
   const categories = {
