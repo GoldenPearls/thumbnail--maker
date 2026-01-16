@@ -229,8 +229,8 @@ const ThumbnailMaker = () => {
         const sW = 190;
         const sH = 190;
 
-        const sX = cardX + cardW - sW - 10;
-        const sY = cardY - 50;
+        const sX = cardX + cardW - sW - 5;
+        const sY = cardY - 80;
 
         ctx.save();
         ctx.translate(sX + sW / 2, sY + sH / 2);
