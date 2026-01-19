@@ -36,6 +36,7 @@ const ThumbnailMaker = () => {
     "🎭 연극":   { dot: "#6D597A", bg: "#F5F0FF", label: "공연기록",   sticker: `${STICKER_BASE}/theater.png` },
     "🍜 음식":   { dot: "#D62828", bg: "#FFF0EE", label: "먹데이트",   sticker: `${STICKER_BASE}/food.png` },
     "🎬 영화":   { dot: "#355070", bg: "#EEF1FF", label: "영화노트",   sticker: `${STICKER_BASE}/movie.png` },
+    "🍷 술": {  dot: "#2EC4B6", bg:  "#E9FBFF", label: "한 잔의 기록", sticker: `${STICKER_BASE}/drink.png`},
   };
 
   const fonts = [
