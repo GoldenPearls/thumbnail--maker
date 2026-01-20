@@ -249,3 +249,51 @@ label {
   font-weight: 900;
   margin-top: 15px;
 }
+
+/* ✅ 폰트 크기 슬라이더 */
+.range {
+  width: 100%;
+  accent-color: #3a2f24;
+}
+
+/* ✅ 색 선택 UI */
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.color-row input[type="color"]{
+  width: 54px;
+  height: 40px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.mini-btn {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid #e6dfd4;
+  background: #fffdf9;
+  cursor: pointer;
+  font-weight: 900;
+  color: #4a4036;
+}
+
+.mini-btn:hover {
+  border-color: #d8d1c6;
+}
+
+.hint {
+  margin-top: 6px;
+  font-size: 0.92rem;
+  color: #7a7166;
+  font-weight: 700;
+}
+
+.hint.subtle {
+  color: #8a8074;
+  font-weight: 700;
+}
