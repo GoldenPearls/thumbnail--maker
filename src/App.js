@@ -66,6 +66,23 @@ const HIGHLIGHT_PRESETS = {
 };
 
 /* -----------------------------
+   ✅ 카테고리별 스탬프 문구
+------------------------------ */
+const STAMP_TEXT_BY_CATEGORY = {
+  "🎡 놀거리": "PLAYLOG",
+  "☕ 카페": "CAFE LOG",
+  "🍰 디저트": "SWEET",
+  "💄 뷰티": "BEAUTY",
+  "✈️ 여행": "TRIP",
+  "📦 제품리뷰": "REVIEW",
+  "🎭 연극": "SHOW",
+  "🍜 음식": "FOODIE",
+  "🎬 영화": "MOVIE",
+  "🍷 술": "CHEERS",
+};
+
+
+/* -----------------------------
    ✅ 하이라이트/리본 그리기
 ------------------------------ */
 const getLines = (text) =>
@@ -801,14 +818,20 @@ const ThumbnailMaker = () => {
     }
 
     if (theme.cornerStamp) {
+      const stampText =
+        STAMP_TEXT_BY_CATEGORY[category] ||
+        style?.label ||
+        "RECORD";
+    
       drawCornerStamp(
         ctx,
         cardX + cardW - 70,
         cardY + cardH - 36,
-        "RECORD",
+        stampText,
         "rgba(120,60,40,0.50)",
         selectedFont
       );
+    }
     }
 
     if (theme.decorations?.some((d) => d.type === "tape")) {
