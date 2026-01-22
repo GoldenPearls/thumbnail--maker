@@ -1,6 +1,12 @@
+/* ===========================
+   App.js (통파일)
+   - 제목 / 부제 / 위치 완전 분리
+   - B / E 템플릿에 text 레이아웃 적용
+=========================== */
+
 const { useState, useRef, useEffect } = React;
 
-/** 이미지 로더 유틸 */
+/** 이미지 로더 */
 const loadImg = (src) =>
   new Promise((resolve, reject) => {
     const img = new Image();
@@ -11,8 +17,69 @@ const loadImg = (src) =>
   });
 
 /* -----------------------------
-   🎨 유틸리티 & 장식 도구들
+   유틸
 ------------------------------ */
+const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+const hexToRgb = (hex) => {
+  const h = (hex || "").replace("#", "").trim();
+  const full = h.length === 3 ? h.split("").map((c) => c + c).join("") : h;
+  if (full.length !== 6) return null;
+  const num = parseInt(full, 16);
+  return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+};
+
+const mixWithWhite = (hex, mix = 0.68) => {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return null;
+  const m = clamp(mix, 0, 1);
+  return {
+    r: Math.round(rgb.r + (255 - rgb.r) * m),
+    g: Math.round(rgb.g + (255 - rgb.g) * m),
+    b: Math.round(rgb.b + (255 - rgb.b) * m),
+  };
+};
+
+const makeBadgeBgFromBg = (bgHex, { mix = 0.68, alpha = 0.92 } = {}) => {
+  const rgb = mixWithWhite(bgHex, mix);
+  if (!rgb) return "rgba(255, 247, 235, 0.92)";
+  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${clamp(alpha, 0, 1)})`;
+};
+
+const makeBadgeTextFromBg = (bgHex, strength = 0.72) => {
+  const rgb = hexToRgb(bgHex);
+  if (!rgb) return "#5a3d2b";
+  const s = clamp(strength, 0, 1);
+  return `rgb(${Math.round(rgb.r * (1 - s))}, ${Math.round(
+    rgb.g * (1 - s)
+  )}, ${Math.round(rgb.b * (1 - s))})`;
+};
+
+/* -----------------------------
+   ✅ 하이라이트 프리셋(카테고리별 2톤)
+------------------------------ */
+const HIGHLIGHT_PRESETS = {
+  "🎡 놀거리": { line1: "#FFF3EC", line2: "#FFE1D6" },
+  "☕ 카페": { line1: "#F7F1EA", line2: "#EADFD6" },
+  "🍰 디저트": { line1: "#FFF2CC", line2: "#FFD6E8" },
+  "💄 뷰티": { line1: "#FFF0F6", line2: "#FFD1E5" },
+  "✈️ 여행": { line1: "#EEF6FF", line2: "#DCEEFF" },
+  "📦 제품리뷰": { line1: "#F3F4F6", line2: "#E7E9EE" },
+  "🎭 연극": { line1: "#F5F0FF", line2: "#E8DDFF" },
+  "🍜 음식": { line1: "#FFF7EB", line2: "#FFE2C9" },
+  "🎬 영화": { line1: "#1F2A44", line2: "#2F3B57" },
+  "🍷 술": { line1: "#E9FBFF", line2: "#D6FFF8" },
+};
+
+/* -----------------------------
+   ✅ 하이라이트/리본 그리기
+------------------------------ */
+const getLines = (text) =>
+  (text || "")
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
 const roundedRectPath = (ctx, x, y, w, h, r) => {
   const radius = Math.min(r, w / 2, h / 2);
   ctx.beginPath();
@@ -28,173 +95,386 @@ const roundedRectPath = (ctx, x, y, w, h, r) => {
   ctx.closePath();
 };
 
-const drawTape = (ctx, x, y, w, h, rotateDeg = -6, color = "rgba(255,255,255,0.55)") => {
-  ctx.save();
-  ctx.translate(x + w / 2, y + h / 2);
-  ctx.rotate((rotateDeg * Math.PI) / 180);
-  ctx.shadowColor = "rgba(0,0,0,0.12)";
-  ctx.shadowBlur = 10;
-  ctx.shadowOffsetY = 6;
-  roundedRectPath(ctx, -w / 2, -h / 2, w, h, 18);
-  ctx.fillStyle = color;
-  ctx.fill();
-  ctx.restore();
-};
-
-const drawBanner = (ctx, x, y, w, h, fill = "rgba(255,247,235,0.92)") => {
-  ctx.save();
-  ctx.shadowColor = "rgba(0,0,0,0.16)";
-  ctx.shadowBlur = 16;
-  ctx.shadowOffsetY = 10;
-  roundedRectPath(ctx, x, y, w, h, 28);
-  ctx.fillStyle = fill;
-  ctx.fill();
-  ctx.restore();
-};
-
-const drawCornerStamp = (ctx, x, y, text, color = "rgba(120,60,40,0.55)", fontFamily = "YPairing") => {
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate((-10 * Math.PI) / 180);
-  ctx.strokeStyle = color;
-  ctx.lineWidth = 4;
-  ctx.setLineDash([8, 6]);
-  roundedRectPath(ctx, -170, -60, 340, 120, 22);
-  ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.font = `900 46px ${fontFamily}`;
-  ctx.fillStyle = color;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(text, 0, 0);
-  ctx.restore();
-};
-
-const drawNoteLines = (ctx, x, y, w, h) => {
-  ctx.save();
-  ctx.beginPath();
-  roundedRectPath(ctx, x, y, w, h, 26);
-  ctx.clip();
-  ctx.globalAlpha = 0.18;
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = "rgba(140,110,90,0.55)";
-  // 줄 간격을 42px로 설정하여 텍스트와 조화롭게 배치
-  for (let yy = y + 42; yy < y + h; yy += 42) {
-    ctx.beginPath();
-    ctx.moveTo(x + 30, yy);
-    ctx.lineTo(x + w - 30, yy);
-    ctx.stroke();
+const drawTextHighlight = (
+  ctx,
+  {
+    lines,
+    x,
+    yCenter,
+    lineHeight,
+    align = "center",
+    padX = 26,
+    padY = 16,
+    radius = 26,
+    fill = "rgba(255,255,255,0.86)",
+    fills = null,
+    mode = "pill", // "pill" | "stripe"
+    stripeSkew = 10,
+    shadow = true,
   }
-  ctx.restore();
+) => {
+  const totalH = lines.length * lineHeight;
+  const startY = yCenter - totalH / 2 + lineHeight / 2;
+
+  lines.forEach((line, i) => {
+    const metrics = ctx.measureText(line);
+    const textW = metrics.width;
+
+    let leftX;
+    if (align === "left") leftX = x;
+    else if (align === "right") leftX = x - textW;
+    else leftX = x - textW / 2;
+
+    const boxX = leftX - padX;
+    const boxY = startY + i * lineHeight - lineHeight / 2 - padY / 2;
+    const boxW = textW + padX * 2;
+    const boxH = lineHeight + padY;
+
+    ctx.save();
+    if (shadow) {
+      ctx.shadowColor = "rgba(0,0,0,0.18)";
+      ctx.shadowBlur = 18;
+      ctx.shadowOffsetY = 10;
+    }
+
+    ctx.fillStyle = fills && fills[i] ? fills[i] : fill;
+
+    if (mode === "stripe") {
+      ctx.beginPath();
+      ctx.moveTo(boxX + stripeSkew, boxY);
+      ctx.lineTo(boxX + boxW, boxY);
+      ctx.lineTo(boxX + boxW - stripeSkew, boxY + boxH);
+      ctx.lineTo(boxX, boxY + boxH);
+      ctx.closePath();
+      ctx.fill();
+    } else {
+      roundedRectPath(ctx, boxX, boxY, boxW, boxH, radius);
+      ctx.fill();
+    }
+
+    ctx.restore();
+  });
 };
 
 /* -----------------------------
-   🚀 테마 정의 (B/E 유지 + G~L 총 8종)
+   ✅ "동화" 텍스트(Glow+Ink) 렌더
+------------------------------ */
+const drawFairyLine = (
+  ctx,
+  text,
+  x,
+  y,
+  {
+    fill = "#2f1d12",
+    glow = true,
+    glowColor = "rgba(255,255,255,0.85)",
+    glowBlur = 16,
+    inkShadow = true,
+    inkColor = "rgba(0,0,0,0.28)",
+    inkBlur = 6,
+    inkOffsetY = 4,
+    alpha = 1,
+  } = {}
+) => {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+
+  if (glow) {
+    ctx.save();
+    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = glowBlur;
+    ctx.shadowOffsetY = -1;
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+
+  if (inkShadow) {
+    ctx.save();
+    ctx.fillStyle = "rgba(70,55,45,0.35)";
+    ctx.shadowColor = inkColor;
+    ctx.shadowBlur = inkBlur;
+    ctx.shadowOffsetY = inkOffsetY;
+    ctx.fillText(text, x, y + 2);
+    ctx.restore();
+  }
+
+  ctx.save();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = fill;
+  ctx.fillText(text, x, y);
+  ctx.restore();
+
+  ctx.restore();
+};
+
+const drawFairyMultiline = (ctx, lines, x, yCenter, lineHeight, style) => {
+  const totalH = lines.length * lineHeight;
+  const startY = yCenter - totalH / 2 + lineHeight / 2;
+  lines.forEach((line, i) => {
+    const y = startY + i * lineHeight;
+    drawFairyLine(ctx, line, x, y, style);
+  });
+};
+
+/* -----------------------------
+   템플릿 (B/E 유지 + 텍스트 레이아웃 추가)
 ------------------------------ */
 const THEMES = {
+  A_PAPER_CLASSIC: {
+    name: "A 종이카드(기본)",
+    frameMargin: 40,
+    frameR: 60,
+    photoVail: true,
+    bottomGrad: true,
+    cardFill: "rgba(255, 247, 235, 0.94)",
+    cardDash: true,
+    titleDefaultColor: "#4a2f1f",
+    titleAlign: "center",
+    titleBaseSize: 94,
+    sticker: { w: 190, h: 190, offsetX: 5, offsetY: -100, rotateDeg: -10 },
+  },
+
   B_PAPER_BOLD: {
-    name: "종이카드(B)",
-    frameMargin: 36, frameR: 60, photoVail: true, bottomGrad: true,
-    cardFill: "rgba(255, 247, 235, 0.96)", cardDash: true,
-    titleDefaultColor: "#2f1d12", titleAlign: "center", titleBaseSize: 102,
-    text: { title: { y: 0.43, size: 102 }, subtitle: { y: 0.66, size: 54 }, location: { y: 0.86, size: 42 } },
+    name: "B 종이카드(진한 제목)",
+    frameMargin: 36,
+    frameR: 60,
+    photoVail: true,
+    bottomGrad: true,
+    cardFill: "rgba(255, 247, 235, 0.96)",
+    cardDash: true,
+    titleDefaultColor: "#2f1d12",
+    titleAlign: "center",
+    titleBaseSize: 102,
     sticker: { w: 190, h: 190, offsetX: 10, offsetY: -110, rotateDeg: -8 },
+
+    // ✅ 분리 텍스트 레이아웃
+    text: {
+      title: { y: 0.43, align: "center", size: 102 },
+      subtitle: { y: 0.66, align: "center", size: 54, alpha: 0.9 },
+      location: { y: 0.86, align: "center", size: 42, alpha: 0.85 },
+    },
   },
+
+  C_MINIMAL: {
+    name: "C 미니멀(깔끔)",
+    frameMargin: 52,
+    frameR: 54,
+    photoVail: false,
+    bottomGrad: false,
+    cardFill: "rgba(255, 255, 255, 0.92)",
+    cardDash: false,
+    titleDefaultColor: "#2a211b",
+    titleAlign: "left",
+    titleBaseSize: 86,
+    sticker: { w: 160, h: 160, offsetX: 0, offsetY: -85, rotateDeg: -10 },
+  },
+
+  D_DARK: {
+    name: "D 다크(영화/밤)",
+    frameMargin: 40,
+    frameR: 60,
+    photoVail: false,
+    bottomGrad: true,
+    cardFill: "rgba(0,0,0,0.40)",
+    cardDash: false,
+    titleDefaultColor: "#ffffff",
+    titleAlign: "left",
+    titleBaseSize: 86,
+    sticker: { w: 170, h: 170, offsetX: 0, offsetY: -90, rotateDeg: -8 },
+  },
+
   E_POSTER: {
-    name: "포스터(E)",
-    frameMargin: 40, frameR: 60, photoVail: false, bottomGrad: true,
-    cardFill: "rgba(0,0,0,0.33)", cardDash: false,
-    titleDefaultColor: "#fff7e8", titleAlign: "center", titleBaseSize: 92,
-    text: { title: { y: 0.40, size: 92 }, subtitle: { y: 0.62, size: 52 }, location: { y: 0.82, size: 40 } },
+    name: "E 포스터(공연)",
+    frameMargin: 40,
+    frameR: 60,
+    photoVail: false,
+    bottomGrad: true,
+    cardFill: "rgba(0,0,0,0.33)",
+    cardDash: false,
+    titleDefaultColor: "#fff7e8",
+    titleAlign: "center",
+    titleBaseSize: 92,
     sticker: { w: 180, h: 180, offsetX: 0, offsetY: -95, rotateDeg: -10 },
+
+    // ✅ 분리 텍스트 레이아웃
+    text: {
+      title: { y: 0.40, align: "center", size: 92 },
+      subtitle: { y: 0.62, align: "center", size: 52, alpha: 0.92 },
+      location: { y: 0.82, align: "center", size: 40, alpha: 0.9 },
+    },
   },
-  G_POLAROID: {
-    name: "폴라로이드(G)",
-    frameMargin: 54, frameR: 44, photoVail: true, bottomGrad: false,
-    cardFill: "rgba(255,255,255,0.96)", cardDash: false,
-    titleDefaultColor: "#2f1d12", titleAlign: "center", titleBaseSize: 92,
-    cardPos: "mid", cardH: 320, decorations: [{ type: "tape" }],
-    text: { title: { y: 0.38, size: 92 }, subtitle: { y: 0.64, size: 50 }, location: { y: 0.86, size: 40 } },
-    sticker: { w: 180, h: 180, offsetX: 0, offsetY: -95, rotateDeg: -8 },
-  },
-  H_TOP_BANNER: {
-    name: "상단 배너(H)",
-    frameMargin: 40, frameR: 60, photoVail: true, bottomGrad: true,
-    cardFill: "rgba(255, 247, 235, 0.94)", cardDash: false,
-    titleDefaultColor: "#2f1d12", titleAlign: "center", titleBaseSize: 102,
-    cardPos: "top", cardH: 240, banner: true,
-    text: { title: { y: 0.50, size: 102 }, subtitle: { y: 0.84, size: 46 }, location: { y: 0.98, size: 36 } },
+
+  F_TOP_TITLE: {
+    name: "F 상단 타이틀(가벼움)",
+    frameMargin: 56,
+    frameR: 54,
+    photoVail: true,
+    bottomGrad: false,
+    cardFill: "rgba(255, 247, 235, 0.92)",
+    cardDash: true,
+    titleDefaultColor: "#3a2f24",
+    titleAlign: "center",
+    titleBaseSize: 88,
     sticker: { w: 170, h: 170, offsetX: 0, offsetY: -90, rotateDeg: -10 },
-  },
-  I_SIDE_TAG: {
-    name: "사이드 태그(I)",
-    frameMargin: 44, frameR: 58, photoVail: true, bottomGrad: true,
-    cardFill: "rgba(255, 255, 255, 0.90)", cardDash: true,
-    titleDefaultColor: "#2a211b", titleAlign: "left", titleBaseSize: 88,
-    cardPos: "bottom", cardH: 280, sideTag: true,
-    text: { title: { y: 0.42, size: 88 }, subtitle: { y: 0.70, size: 48 }, location: { y: 0.90, size: 38 } },
-    sticker: { w: 160, h: 160, offsetX: 0, offsetY: -88, rotateDeg: -12 },
-  },
-  J_STAMP_CORNER: {
-    name: "코너 스탬프(J)",
-    frameMargin: 40, frameR: 60, photoVail: true, bottomGrad: true,
-    cardFill: "rgba(255, 247, 235, 0.92)", cardDash: false,
-    titleDefaultColor: "#2f1d12", titleAlign: "center", titleBaseSize: 96,
-    cardPos: "bottom", cardH: 280, cornerStamp: true,
-    text: { title: { y: 0.44, size: 96 }, subtitle: { y: 0.70, size: 52 }, location: { y: 0.90, size: 40 } },
-    sticker: { w: 180, h: 180, offsetX: 0, offsetY: -95, rotateDeg: -8 },
-  },
-  K_GLASS_BAR: {
-    name: "유리바(K)",
-    frameMargin: 40, frameR: 60, photoVail: false, bottomGrad: false,
-    cardFill: "rgba(255,255,255,0.30)", cardDash: false, glass: true,
-    titleDefaultColor: "#ffffff", titleAlign: "center", titleBaseSize: 92,
-    cardPos: "bottom", cardH: 260,
-    text: { title: { y: 0.44, size: 92 }, subtitle: { y: 0.70, size: 48 }, location: { y: 0.90, size: 38 } },
-    sticker: { w: 170, h: 170, offsetX: 0, offsetY: -92, rotateDeg: -10 },
-  },
-  L_NOTE_LINES: {
-    name: "줄노트 기록(L)",
-    frameMargin: 40, frameR: 60, photoVail: true, bottomGrad: true,
-    cardFill: "rgba(255, 252, 245, 0.96)", cardDash: true, noteLines: true,
-    titleDefaultColor: "#3d2b1f", titleAlign: "center", titleBaseSize: 94,
-    cardPos: "bottom", cardH: 340,
-    text: { title: { y: 0.42, size: 94 }, subtitle: { y: 0.72, size: 50 }, location: { y: 0.90, size: 38 } },
-    sticker: { w: 180, h: 180, offsetX: 0, offsetY: -100, rotateDeg: -8 },
+    cardPos: "mid",
   },
 };
 
-/* -----------------------------
-   🏠 메인 컴포넌트
------------------------------- */
 const ThumbnailMaker = () => {
   const [image, setImage] = useState(null);
   const [category, setCategory] = useState("🍜 음식");
+
+  // ✅ 완전 분리: 제목/부제/위치
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [locationText, setLocationText] = useState("");
-  const [themeKey, setThemeKey] = useState("B_PAPER_BOLD");
+
   const [selectedFont, setSelectedFont] = useState("YPairing");
   const [result, setResult] = useState(null);
+
+  // ✅ 템플릿 선택
+  const [themeKey, setThemeKey] = useState("A_PAPER_CLASSIC");
+
+  // ✅ 폰트 크기(사용자 조절) - 제목 사이즈
   const [titleSize, setTitleSize] = useState(94);
 
-  const canvasRef = useRef(null);
+  // ✅ 글씨 색(사용자 지정) - 비어 있으면 템플릿 기본색
+  const [titleColor, setTitleColor] = useState("");
 
+  // ✅ 하이라이트(제목 뒤 배경)
+  const [hlEnabled, setHlEnabled] = useState(true);
+  const [hlMode, setHlMode] = useState("pill"); // "pill" | "stripe"
+  const [hlColor, setHlColor] = useState("#FFF7EB");
+  const [hlAlpha, setHlAlpha] = useState(0.92);
+
+  // ✅ 라인별 하이라이트
+  const [hlPerLine, setHlPerLine] = useState(true);
+  const [hlAutoTwoTone, setHlAutoTwoTone] = useState(true);
+  const [hlLine1, setHlLine1] = useState("#FFF7EB");
+  const [hlLine2, setHlLine2] = useState("#FFE2C9");
+  const [hlLine3, setHlLine3] = useState("#EAF7FF");
+
+  const canvasRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  /** 스티커 경로 */
+  const STICKER_BASE = "./assets";
+
+  /** 카테고리 */
   const categories = {
-    "🍜 음식": { dot: "#D62828", bg: "#FFF0EE", label: "먹데이트", sticker: "./assets/food.png" },
-    "☕ 카페": { dot: "#8D6E63", bg: "#F7F1EA", label: "카페노트", sticker: "./assets/cafe.png" },
-    "✈️ 여행": { dot: "#457B9D", bg: "#EEF6FF", label: "여행기록", sticker: "./assets/travel.png" },
-    "🎡 놀거리": { dot: "#E76F51", bg: "#FFF3EC", label: "놀거리노트", sticker: "./assets/play.png" },
+    "🎡 놀거리": {
+      dot: "#E76F51",
+      bg: "#FFF3EC",
+      label: "놀거리노트",
+      sticker: `${STICKER_BASE}/play.png`,
+    },
+    "☕ 카페": {
+      dot: "#8D6E63",
+      bg: "#F7F1EA",
+      label: "카페노트",
+      sticker: `${STICKER_BASE}/cafe.png`,
+    },
+    "🍰 디저트": {
+      dot: "#E3A008",
+      bg: "#FFF2CC",
+      label: "디저트일기",
+      sticker: `${STICKER_BASE}/dessert.png`,
+    },
+    "💄 뷰티": {
+      dot: "#FF5C8A",
+      bg: "#FFF0F6",
+      label: "뷰티노트",
+      sticker: `${STICKER_BASE}/beauty.png`,
+    },
+    "✈️ 여행": {
+      dot: "#457B9D",
+      bg: "#EEF6FF",
+      label: "여행기록",
+      sticker: `${STICKER_BASE}/travel.png`,
+    },
+    "📦 제품리뷰": {
+      dot: "#6C757D",
+      bg: "#F3F4F6",
+      label: "사용후기",
+      sticker: `${STICKER_BASE}/product.png`,
+    },
+    "🎭 연극": {
+      dot: "#6D597A",
+      bg: "#F5F0FF",
+      label: "공연기록",
+      sticker: `${STICKER_BASE}/theater.png`,
+    },
+    "🍜 음식": {
+      dot: "#D62828",
+      bg: "#FFF0EE",
+      label: "먹데이트",
+      sticker: `${STICKER_BASE}/food.png`,
+    },
+    "🎬 영화": {
+      dot: "#355070",
+      bg: "#EEF1FF",
+      label: "영화노트",
+      sticker: `${STICKER_BASE}/movie.png`,
+    },
+    "🍷 술": {
+      dot: "#2EC4B6",
+      bg: "#E9FBFF",
+      label: "오늘의 한 잔",
+      sticker: `${STICKER_BASE}/drink.png`,
+    },
   };
 
+  const fonts = [
+    { name: "Y페어링 (추천)", value: "YPairing" },
+    { name: "배민 한나체", value: '"Black Han Sans"' },
+    { name: "도현체", value: '"Do Hyeon"' },
+    { name: "고운돋움", value: '"Gowun Dodum"' },
+    { name: "땅스부대찌개 (강력추천)", value: "TtangsBudaeJjigae" },
+    { name: "눈누 기초고딕 (본문용)", value: "NoonnuBasicGothic" },
+    { name: "학교안심 별빛하늘", value: "SchoolSafetyStarrySky" },
+    { name: "옹글잎 콩콩체", value: "OngleipKonkon" },
+    { name: "학교안심 어항꾸미기", value: "SchoolSafetyAquariumDecor" },
+    { name: "케리스케두 라인", value: "KerisKeduLine" },
+    { name: "온글잎 박다현체", value: "OngleipParkDahyeon" },
+    { name: "밑미 폰트", value: "MitmiFont" },
+    { name: "학교안심 별자리", value: "SchoolSafetyConstellation" },
+    { name: "넥슨 배찌체", value: "NexonBazzi" },
+  ];
+
+  // ✅ 템플릿 바뀌면 제목 폰트 기본값도 같이
   useEffect(() => {
     const t = THEMES[themeKey];
     if (t?.titleBaseSize) setTitleSize(t.titleBaseSize);
   }, [themeKey]);
 
+  // ✅ 카테고리 바뀌면: 하이라이트 프리셋 자동 세팅
+  useEffect(() => {
+    const style = categories[category];
+
+    setHlColor(style?.bg || "#FFF7EB");
+
+    const preset = HIGHLIGHT_PRESETS[category];
+    if (preset) {
+      setHlPerLine(true);
+      setHlAutoTwoTone(true);
+      setHlLine1(preset.line1);
+      setHlLine2(preset.line2);
+      setHlLine3(preset.line1);
+    }
+
+    if (!titleColor?.trim()) {
+      if (category === "🎬 영화") setTitleColor("#FFFFFF");
+      else if (category === "📦 제품리뷰") setTitleColor("#2A2A2A");
+      else setTitleColor("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category]);
+
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
@@ -207,114 +487,590 @@ const ThumbnailMaker = () => {
   const makeThumbnail = async () => {
     if (!image) return;
     await document.fonts.ready;
+
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-    const style = categories[category];
-    const theme = THEMES[themeKey];
+    canvas.width = 1080;
+    canvas.height = 1080;
 
-    // 1. 전체 배경 & 사진
-    ctx.fillStyle = style.bg;
+    const style = categories[category];
+    const theme = THEMES[themeKey] || THEMES.A_PAPER_CLASSIC;
+
+    // === 0) 전체 배경
+    ctx.fillStyle = style.bg || "#f2e8d8";
     ctx.fillRect(0, 0, 1080, 1080);
-    const frameMargin = theme.frameMargin;
+
+    // === 1) 사진 영역: 둥근 프레임
+    const frameMargin = theme.frameMargin ?? 40;
+    const frameX = frameMargin;
+    const frameY = frameMargin;
     const frameW = 1080 - frameMargin * 2;
     const frameH = 1080 - frameMargin * 2;
+    const frameR = theme.frameR ?? 60;
 
     ctx.save();
-    roundedRectPath(ctx, frameMargin, frameMargin, frameW, frameH, theme.frameR);
+    ctx.shadowColor = "rgba(0,0,0,0.15)";
+    ctx.shadowBlur = 30;
+    ctx.shadowOffsetY = 12;
+    roundedRectPath(ctx, frameX, frameY, frameW, frameH, frameR);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    roundedRectPath(
+      ctx,
+      frameX + 10,
+      frameY + 10,
+      frameW - 20,
+      frameH - 20,
+      frameR - 10
+    );
     ctx.clip();
+
     const size = Math.min(image.width, image.height);
-    ctx.drawImage(image, (image.width - size) / 2, (image.height - size) / 2, size, size, frameMargin, frameMargin, frameW, frameH);
-    if (theme.photoVail) { ctx.fillStyle = "rgba(0,0,0,0.05)"; ctx.fillRect(frameMargin, frameMargin, frameW, frameH); }
-    ctx.restore();
+    const sx = (image.width - size) / 2;
+    const sy = (image.height - size) / 2;
+    ctx.drawImage(
+      image,
+      sx,
+      sy,
+      size,
+      size,
+      frameX + 10,
+      frameY + 10,
+      frameW - 20,
+      frameH - 20
+    );
 
-    // 2. 카드(텍스트 영역) 계산
-    const cardX = frameMargin + 45;
-    const cardW = frameW - 90;
-    const cardH = theme.cardH ?? 280;
-    const cardY = theme.cardPos === "mid" ? frameMargin + 560 : theme.cardPos === "top" ? frameMargin + 160 : frameMargin + frameH - cardH - 55;
+    if (theme.photoVail) {
+      const warm = ctx.createLinearGradient(0, frameY, 0, frameY + frameH);
+      warm.addColorStop(0, "rgba(255, 240, 220, 0.10)");
+      warm.addColorStop(1, "rgba(240, 230, 210, 0.18)");
+      ctx.fillStyle = warm;
+      ctx.fillRect(frameX + 10, frameY + 10, frameW - 20, frameH - 20);
+    }
 
-    // 카드 배경
+    if (theme.bottomGrad) {
+      const grad = ctx.createLinearGradient(0, 520, 0, 1080);
+      grad.addColorStop(0, "rgba(0,0,0,0)");
+      grad.addColorStop(1, "rgba(0,0,0,0.28)");
+      ctx.fillStyle = grad;
+      ctx.fillRect(frameX + 10, frameY + 10, frameW - 20, frameH - 20);
+    }
+
+    ctx.restore(); // clip
+
+    // === 2) 좌상단 라벨
+    const badgeX = frameX + 35;
+    const badgeY = frameY + 35;
+    const badgeH = 86;
+    const badgeR = 22;
+
+    ctx.font = `900 44px ${selectedFont}`;
+    const labelW = ctx.measureText(style.label).width;
+
+    const dotR = 10;
+    const leftPad = 22;
+    const rightPad = 26;
+    const gap = 16;
+    const badgeW = leftPad + dotR * 2 + gap + labelW + rightPad;
+
+    const badgeBg = makeBadgeBgFromBg(style.bg, { mix: 0.68, alpha: 0.92 });
+    const badgeTextColor = makeBadgeTextFromBg(style.bg, 0.72);
+
     ctx.save();
-    ctx.shadowColor = "rgba(0,0,0,0.18)"; ctx.shadowBlur = 22; ctx.shadowOffsetY = 10;
-    roundedRectPath(ctx, cardX, cardY, cardW, cardH, 30);
-    ctx.fillStyle = theme.cardFill; ctx.fill();
+    ctx.shadowColor = "rgba(0,0,0,0.12)";
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 8;
+    roundedRectPath(ctx, badgeX, badgeY, badgeW, badgeH, badgeR);
+    ctx.fillStyle = badgeBg;
+    ctx.fill();
     ctx.restore();
 
-    // 3. 테마별 장식 레이어
-    if (theme.noteLines) drawNoteLines(ctx, cardX, cardY, cardW, cardH);
-    if (theme.banner) drawBanner(ctx, frameMargin + 60, frameMargin + 110, frameW - 120, 160);
-    if (theme.cornerStamp) drawCornerStamp(ctx, cardX + cardW - 70, cardY + cardH - 36, "RECORD", "rgba(120,60,40,0.5)", selectedFont);
-    if (theme.decorations?.some(d => d.type === "tape")) {
-      drawTape(ctx, cardX + 40, cardY - 26, 220, 70, -8);
-      drawTape(ctx, cardX + cardW - 260, cardY - 30, 220, 70, 6);
-    }
-    if (theme.glass) {
-      ctx.save(); roundedRectPath(ctx, cardX, cardY, cardW, cardH, 30);
-      ctx.strokeStyle = "rgba(255,255,255,0.35)"; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
-    }
-    if (theme.sideTag) {
-      const tagW = 90, tagX = frameMargin + frameW - tagW - 28, tagY = frameMargin + 160, tagH = 420;
-      drawBanner(ctx, tagX, tagY, tagW, tagH);
-      ctx.save(); ctx.translate(tagX + tagW / 2, tagY + tagH / 2); ctx.rotate(-Math.PI / 2);
-      ctx.font = `900 44px ${selectedFont}`; ctx.fillStyle = "rgba(70,55,45,0.85)"; ctx.textAlign = "center";
-      ctx.fillText(style.label, 0, 0); ctx.restore();
+    ctx.beginPath();
+    ctx.arc(badgeX + leftPad + dotR, badgeY + badgeH / 2, dotR, 0, Math.PI * 2);
+    ctx.fillStyle = style.dot;
+    ctx.fill();
+
+    ctx.fillStyle = badgeTextColor;
+    ctx.font = `900 44px ${selectedFont}`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    ctx.fillText(
+      style.label,
+      badgeX + leftPad + dotR * 2 + gap,
+      badgeY + badgeH / 2 + 2
+    );
+
+    // === 3) 카드(텍스트 영역)
+    const cardX = frameX + 45;
+    const cardW = frameW - 90;
+    const cardH = 280;
+    const defaultCardY = frameY + frameH - cardH - 55;
+    const cardY = theme.cardPos === "mid" ? frameY + 560 : defaultCardY;
+    const cardR = 30;
+
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.18)";
+    ctx.shadowBlur = 22;
+    ctx.shadowOffsetY = 10;
+    roundedRectPath(ctx, cardX, cardY, cardW, cardH, cardR);
+    ctx.fillStyle = theme.cardFill || "rgba(255, 247, 235, 0.94)";
+    ctx.fill();
+    ctx.restore();
+
+    if (theme.cardDash) {
+      ctx.save();
+      roundedRectPath(ctx, cardX, cardY, cardW, cardH, cardR);
+      ctx.strokeStyle = "rgba(120, 90, 70, 0.25)";
+      ctx.lineWidth = 3;
+      ctx.setLineDash([10, 10]);
+      ctx.stroke();
+      ctx.restore();
     }
 
-    // 4. 텍스트 렌더링
-    const align = theme.titleAlign || "center";
-    const titleX = align === "center" ? cardX + cardW / 2 : align === "left" ? cardX + 70 : cardX + cardW - 70;
-    
-    ctx.textAlign = align;
+    // === 4) 텍스트 (제목/부제/위치 완전 분리)
+    const themeText =
+      theme.text || {
+        title: { y: 0.45, align: theme.titleAlign || "center", size: titleSize },
+        subtitle: { y: 0.68, align: theme.titleAlign || "center", size: 52, alpha: 0.9 },
+        location: { y: 0.86, align: theme.titleAlign || "center", size: 40, alpha: 0.85 },
+      };
+
+    const titleLines = getLines(title);
+    const subLines = getLines(subtitle);
+    const locLines = getLines(locationText);
+
+    const getAlignX = (align) => {
+      if (align === "left") return cardX + 70;
+      if (align === "right") return cardX + cardW - 70;
+      return cardX + cardW / 2;
+    };
+
+    const titleAlign = themeText.title?.align || theme.titleAlign || "center";
+    const subAlign = themeText.subtitle?.align || titleAlign;
+    const locAlign = themeText.location?.align || titleAlign;
+
+    const titleX = getAlignX(titleAlign);
+    const subX = getAlignX(subAlign);
+    const locX = getAlignX(locAlign);
+
+    const titleY = cardY + cardH * (themeText.title?.y ?? 0.45);
+    const subY = cardY + cardH * (themeText.subtitle?.y ?? 0.68);
+    const locY = cardY + cardH * (themeText.location?.y ?? 0.86);
+
+    const titleFill = titleColor?.trim()
+      ? titleColor
+      : theme.titleDefaultColor || "#4a2f1f";
+
+    const subFill =
+      category === "🎬 영화" || themeKey === "E_POSTER"
+        ? "rgba(255, 247, 232, 0.95)"
+        : "rgba(70, 55, 45, 0.92)";
+
+    const locFill =
+      category === "🎬 영화" || themeKey === "E_POSTER"
+        ? "rgba(255, 247, 232, 0.90)"
+        : "rgba(85, 70, 58, 0.88)";
+
+    ctx.save();
     ctx.textBaseline = "middle";
 
-    // 제목
-    ctx.font = `900 ${titleSize}px ${selectedFont}`;
-    ctx.fillStyle = theme.titleDefaultColor;
-    const titleLines = title.split("\n").filter(Boolean);
-    titleLines.forEach((line, i) => {
-      ctx.fillText(line, titleX, cardY + cardH * theme.text.title.y + (i * titleSize * 1.1));
-    });
+    // --- 4-1) 제목: 하이라이트 + 동화 텍스트
+    {
+      const baseSize = clamp(themeText.title?.size ?? titleSize, 60, 130);
+      const lineHeight = baseSize + 12;
 
-    // 부제 & 위치
-    ctx.font = `500 48px ${selectedFont}`; ctx.globalAlpha = 0.85;
-    ctx.fillText(subtitle, titleX, cardY + cardH * theme.text.subtitle.y);
-    ctx.font = `400 36px ${selectedFont}`; ctx.globalAlpha = 0.7;
-    ctx.fillText(locationText, titleX, cardY + cardH * theme.text.location.y);
-    ctx.globalAlpha = 1.0;
+      ctx.font = `900 ${baseSize}px ${selectedFont}`;
+      ctx.textAlign =
+        titleAlign === "left" ? "left" : titleAlign === "right" ? "right" : "center";
 
-    // 5. 스티커
-    try {
-      const stickerImg = await loadImg(style.sticker);
-      const s = theme.sticker;
-      ctx.save();
-      ctx.translate(cardX + cardW / 2 + s.offsetX, cardY + s.offsetY);
-      ctx.rotate((s.rotateDeg * Math.PI) / 180);
-      ctx.drawImage(stickerImg, -s.w / 2, -s.h / 2, s.w, s.h);
-      ctx.restore();
-    } catch (e) { console.warn("스티커 누락"); }
+      const alpha = clamp(hlAlpha, 0, 1);
+      const toRgba = (hex) => {
+        const rgb = hexToRgb(hex) || { r: 255, g: 247, b: 235 };
+        return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+      };
 
-    setResult(canvas.toDataURL("image/png"));
+      const hlFill = toRgba(hlColor);
+
+      let fills = null;
+      if (hlPerLine) {
+        if (hlAutoTwoTone) {
+          fills = titleLines.map((_, i) =>
+            i % 2 === 0 ? toRgba(hlLine1) : toRgba(hlLine2)
+          );
+        } else {
+          const manual = [hlLine1, hlLine2, hlLine3].map(toRgba);
+          fills = titleLines.map((_, i) => manual[i] || hlFill);
+        }
+      }
+
+      if (hlEnabled && titleLines.length > 0) {
+        drawTextHighlight(ctx, {
+          lines: titleLines,
+          x: titleX,
+          yCenter: titleY,
+          lineHeight,
+          align: titleAlign,
+          padX: 30,
+          padY: 18,
+          radius: 28,
+          fill: hlFill,
+          fills,
+          mode: hlMode,
+          stripeSkew: 14,
+          shadow: true,
+        });
+      }
+
+      drawFairyMultiline(ctx, titleLines, titleX, titleY, lineHeight, {
+        fill: titleFill,
+        glow: true,
+        glowColor: "rgba(255,255,255,0.85)",
+        glowBlur: 18,
+        inkShadow: true,
+        inkColor: "rgba(0,0,0,0.25)",
+        inkBlur: 7,
+        inkOffsetY: 5,
+        alpha: 1,
+      });
+    }
+
+    // --- 4-2) 부제
+    {
+      const size = clamp(themeText.subtitle?.size ?? 54, 28, 80);
+      const lineHeight = size + 10;
+
+      ctx.font = `800 ${size}px ${selectedFont}`;
+      ctx.textAlign =
+        subAlign === "left" ? "left" : subAlign === "right" ? "right" : "center";
+
+      drawFairyMultiline(ctx, subLines, subX, subY, lineHeight, {
+        fill: subFill,
+        glow: false,
+        inkShadow: true,
+        inkColor: "rgba(0,0,0,0.22)",
+        inkBlur: 5,
+        inkOffsetY: 4,
+        alpha: clamp(themeText.subtitle?.alpha ?? 0.9, 0, 1),
+      });
+    }
+
+    // --- 4-3) 위치
+    {
+      const size = clamp(themeText.location?.size ?? 42, 22, 70);
+      const lineHeight = size + 8;
+
+      ctx.font = `700 ${size}px ${selectedFont}`;
+      ctx.textAlign =
+        locAlign === "left" ? "left" : locAlign === "right" ? "right" : "center";
+
+      drawFairyMultiline(ctx, locLines, locX, locY, lineHeight, {
+        fill: locFill,
+        glow: false,
+        inkShadow: true,
+        inkColor: "rgba(0,0,0,0.20)",
+        inkBlur: 4,
+        inkOffsetY: 3,
+        alpha: clamp(themeText.location?.alpha ?? 0.85, 0, 1),
+      });
+    }
+
+    ctx.restore();
+
+    // === 5) 스티커 PNG
+    if (style.sticker) {
+      try {
+        const stickerImg = await loadImg(style.sticker);
+
+        const s = theme.sticker || {};
+        const sW = s.w ?? 190;
+        const sH = s.h ?? 190;
+
+        const sX = cardX + cardW - sW + (s.offsetX ?? 5);
+        const sY = cardY + (s.offsetY ?? -100);
+
+        ctx.save();
+        ctx.translate(sX + sW / 2, sY + sH / 2);
+        ctx.rotate(((s.rotateDeg ?? -10) * Math.PI) / 180);
+
+        ctx.shadowColor = "rgba(0,0,0,0.22)";
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetY = 10;
+
+        ctx.drawImage(stickerImg, -sW / 2, -sH / 2, sW, sH);
+        ctx.restore();
+      } catch (e) {
+        console.warn("Sticker load failed:", style.sticker, e);
+      }
+    }
+
+    // === 6) 시그니처
+    ctx.font = '400 44px "Nanum Brush Script"';
+    ctx.textAlign = "right";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.fillText(`지나의 ${style.label} 기록장`, frameX + frameW - 20, frameY + frameH - 22);
+
+    setResult(canvas.toDataURL("image/jpeg", 0.92));
   };
 
   return (
-    <div className="p-4 max-w-2xl mx-auto space-y-4">
-      <input type="file" onChange={handleImageUpload} className="block w-full text-sm border p-2" />
-      <div className="grid grid-cols-2 gap-2">
-        <select onChange={(e) => setCategory(e.target.value)} className="border p-2">{Object.keys(categories).map(c => <option key={c}>{c}</option>)}</select>
-        <select onChange={(e) => setThemeKey(e.target.value)} className="border p-2">{Object.keys(THEMES).map(k => <option key={k} value={k}>{THEMES[k].name}</option>)}</select>
-      </div>
-      <textarea placeholder="제목" onChange={(e) => setTitle(e.target.value)} className="w-full border p-2 h-20" />
-      <input placeholder="부제" onChange={(e) => setSubtitle(e.target.value)} className="w-full border p-2" />
-      <button onClick={makeThumbnail} className="w-full bg-indigo-600 text-white p-3 rounded font-bold">이미지 생성</button>
-      <canvas ref={canvasRef} style={{ display: "none" }} />
-      {result && (
-        <div className="mt-4">
-          <img src={result} alt="Result" className="w-full border shadow-xl" />
-          <a href={result} download="thumbnail.png" className="block text-center mt-2 text-indigo-500 underline font-medium">내 기기에 저장</a>
+    <div className="container">
+      <div className="font-preload">폰트미리로딩</div>
+
+      <div className="panel settings">
+        <h2 className="panel-title">✨ 디자인 설정</h2>
+
+        <div className="input-item">
+          <label>1. 사진 업로드</label>
+          <div className="file-box" onClick={() => fileInputRef.current.click()}>
+            {image ? "📸 사진 선택됨" : "📁 사진을 선택하세요"}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            hidden
+            onChange={handleImageUpload}
+            accept="image/*"
+          />
         </div>
-      )}
+
+        <div className="input-item">
+          <label>2. 카테고리</label>
+          <div className="category-grid">
+            {Object.keys(categories).map((cat) => (
+              <button
+                key={cat}
+                className={`cat-btn ${category === cat ? "active" : ""}`}
+                onClick={() => setCategory(cat)}
+                type="button"
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="input-item">
+          <label>3. 템플릿</label>
+          <select
+            className="custom-select"
+            value={themeKey}
+            onChange={(e) => setThemeKey(e.target.value)}
+          >
+            {Object.entries(THEMES).map(([k, t]) => (
+              <option key={k} value={k}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="input-item">
+          <label>4. 폰트 선택</label>
+          <select
+            className="custom-select"
+            value={selectedFont}
+            onChange={(e) => setSelectedFont(e.target.value)}
+          >
+            {fonts.map((f) => (
+              <option key={f.value} value={f.value}>
+                {f.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="input-item">
+          <label>5. 제목 글꼴 크기</label>
+          <input
+            className="range"
+            type="range"
+            min="60"
+            max="120"
+            value={titleSize}
+            onChange={(e) => setTitleSize(Number(e.target.value))}
+          />
+          <div className="hint">{titleSize}px</div>
+        </div>
+
+        <div className="input-item">
+          <label>6. 제목 글씨 색</label>
+          <div className="color-row">
+            <input
+              type="color"
+              value={titleColor || (THEMES[themeKey]?.titleDefaultColor ?? "#4a2f1f")}
+              onChange={(e) => setTitleColor(e.target.value)}
+            />
+            <button className="mini-btn" onClick={() => setTitleColor("")} type="button">
+              템플릿 기본색으로
+            </button>
+          </div>
+          <div className="hint subtle">* 색을 비우면 템플릿 기본 글씨색을 사용해요.</div>
+        </div>
+
+        <hr className="divider" />
+
+        <div className="input-item">
+          <label>7. 제목 뒤 배경(하이라이트/리본)</label>
+
+          <div className="row">
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={hlEnabled}
+                onChange={(e) => setHlEnabled(e.target.checked)}
+              />
+              사용
+            </label>
+
+            <select
+              className="custom-select"
+              value={hlMode}
+              onChange={(e) => setHlMode(e.target.value)}
+            >
+              <option value="pill">둥근 배경(pill)</option>
+              <option value="stripe">리본/스트랩(stripe)</option>
+            </select>
+          </div>
+
+          <div className="row">
+            <div className="color-row">
+              <input type="color" value={hlColor} onChange={(e) => setHlColor(e.target.value)} />
+              <div className="hint subtle">단색 배경</div>
+            </div>
+
+            <div className="slider-row">
+              <span className="hint subtle">투명도</span>
+              <input
+                className="range"
+                type="range"
+                min="0.45"
+                max="1"
+                step="0.01"
+                value={hlAlpha}
+                onChange={(e) => setHlAlpha(Number(e.target.value))}
+              />
+              <span className="hint subtle">{Math.round(hlAlpha * 100)}%</span>
+            </div>
+          </div>
+
+          <div className="row">
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={hlPerLine}
+                onChange={(e) => setHlPerLine(e.target.checked)}
+              />
+              라인별 사용
+            </label>
+
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={hlAutoTwoTone}
+                onChange={(e) => setHlAutoTwoTone(e.target.checked)}
+                disabled={!hlPerLine}
+              />
+              자동 2톤(1줄/2줄 교차)
+            </label>
+          </div>
+
+          <div className="row3">
+            <div className="color-col">
+              <div className="hint subtle">1줄 색</div>
+              <input
+                type="color"
+                value={hlLine1}
+                onChange={(e) => setHlLine1(e.target.value)}
+                disabled={!hlPerLine}
+              />
+            </div>
+
+            <div className="color-col">
+              <div className="hint subtle">2줄 색</div>
+              <input
+                type="color"
+                value={hlLine2}
+                onChange={(e) => setHlLine2(e.target.value)}
+                disabled={!hlPerLine}
+              />
+            </div>
+
+            <div className="color-col">
+              <div className="hint subtle">3줄 색(옵션)</div>
+              <input
+                type="color"
+                value={hlLine3}
+                onChange={(e) => setHlLine3(e.target.value)}
+                disabled={!hlPerLine || hlAutoTwoTone}
+                title="자동 2톤이면 3줄 색은 사용되지 않아요"
+              />
+            </div>
+          </div>
+
+          <div className="hint subtle">* 카테고리를 바꾸면 자동 2톤 프리셋이 기본으로 세팅돼요.</div>
+        </div>
+
+        {/* ✅ 완전 분리 입력 */}
+        <div className="input-item">
+          <label>8. 제목</label>
+          <textarea
+            className="custom-textarea"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="제목을 입력하세요 (엔터로 줄바꿈)"
+          />
+        </div>
+
+        <div className="input-item">
+          <label>9. 부제</label>
+          <input
+            className="custom-select"
+            value={subtitle}
+            onChange={(e) => setSubtitle(e.target.value)}
+            placeholder="예: 오늘은 감성 데이트 코스"
+          />
+        </div>
+
+        <div className="input-item">
+          <label>10. 위치</label>
+          <input
+            className="custom-select"
+            value={locationText}
+            onChange={(e) => setLocationText(e.target.value)}
+            placeholder="예: 📍 서울 홍대입구역 2번 출구"
+          />
+        </div>
+
+        <button className="make-btn" onClick={makeThumbnail} disabled={!image} type="button">
+          썸네일 만들기 ✨
+        </button>
+      </div>
+
+      <div className="panel preview">
+        <h2 className="panel-title">📸 결과 확인</h2>
+        <div className="canvas-wrapper">
+          {result ? (
+            <img src={result} alt="thumbnail" className="result-img" />
+          ) : (
+            <div className="placeholder-box">사진을 먼저 업로드해주세요</div>
+          )}
+        </div>
+
+        {result && (
+          <a href={result} download="jina_thumbnail.jpg" className="download-btn">
+            이미지 저장하기
+          </a>
+        )}
+      </div>
+
+      <canvas ref={canvasRef} style={{ display: "none" }} />
     </div>
   );
 };
 
-ReactDOM.render(<ThumbnailMaker />, document.getElementById("root"));
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<ThumbnailMaker />);
