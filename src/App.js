@@ -1,9 +1,3 @@
-/* ===========================
-   App.js (통파일)
-   - 제목 / 부제 / 위치 완전 분리
-   - B / E 템플릿에 text 레이아웃 적용
-=========================== */
-
 const { useState, useRef, useEffect } = React;
 
 /** 이미지 로더 */
@@ -93,6 +87,98 @@ const roundedRectPath = (ctx, x, y, w, h, r) => {
   ctx.lineTo(x, y + radius);
   ctx.quadraticCurveTo(x, y, x + radius, y);
   ctx.closePath();
+};
+
+/* -----------------------------
+   ✅ 장식(Decorations) 도구들
+------------------------------ */
+const drawTape = (
+  ctx,
+  x,
+  y,
+  w,
+  h,
+  rotateDeg = -6,
+  color = "rgba(255,255,255,0.55)"
+) => {
+  ctx.save();
+  ctx.translate(x + w / 2, y + h / 2);
+  ctx.rotate((rotateDeg * Math.PI) / 180);
+
+  ctx.shadowColor = "rgba(0,0,0,0.12)";
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetY = 6;
+
+  roundedRectPath(ctx, -w / 2, -h / 2, w, h, 18);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.restore();
+};
+
+const drawBanner = (
+  ctx,
+  x,
+  y,
+  w,
+  h,
+  fill = "rgba(255,247,235,0.92)"
+) => {
+  ctx.save();
+  ctx.shadowColor = "rgba(0,0,0,0.16)";
+  ctx.shadowBlur = 16;
+  ctx.shadowOffsetY = 10;
+
+  roundedRectPath(ctx, x, y, w, h, 28);
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.restore();
+};
+
+const drawCornerStamp = (
+  ctx,
+  x,
+  y,
+  text,
+  color = "rgba(120,60,40,0.55)",
+  fontFamily = "YPairing"
+) => {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate((-10 * Math.PI) / 180);
+  ctx.globalAlpha = 0.95;
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 4;
+  ctx.setLineDash([8, 6]);
+  roundedRectPath(ctx, -170, -60, 340, 120, 22);
+  ctx.stroke();
+
+  ctx.setLineDash([]);
+  ctx.font = `900 46px ${fontFamily}`;
+  ctx.fillStyle = color;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, 0, 0);
+
+  ctx.restore();
+};
+
+const drawNoteLines = (ctx, x, y, w, h) => {
+  ctx.save();
+  ctx.beginPath();
+  roundedRectPath(ctx, x, y, w, h, 26);
+  ctx.clip();
+
+  ctx.globalAlpha = 0.18;
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "rgba(140,110,90,0.55)";
+  for (let yy = y + 30; yy < y + h; yy += 36) {
+    ctx.beginPath();
+    ctx.moveTo(x + 26, yy);
+    ctx.lineTo(x + w - 26, yy);
+    ctx.stroke();
+  }
+  ctx.restore();
 };
 
 const drawTextHighlight = (
@@ -218,25 +304,12 @@ const drawFairyMultiline = (ctx, lines, x, yCenter, lineHeight, style) => {
 };
 
 /* -----------------------------
-   템플릿 (B/E 유지 + 텍스트 레이아웃 추가)
+   ✅ 템플릿 (B/E 유지 + 신규 5종)
 ------------------------------ */
 const THEMES = {
-  A_PAPER_CLASSIC: {
-    name: "A 종이카드(기본)",
-    frameMargin: 40,
-    frameR: 60,
-    photoVail: true,
-    bottomGrad: true,
-    cardFill: "rgba(255, 247, 235, 0.94)",
-    cardDash: true,
-    titleDefaultColor: "#4a2f1f",
-    titleAlign: "center",
-    titleBaseSize: 94,
-    sticker: { w: 190, h: 190, offsetX: 5, offsetY: -100, rotateDeg: -10 },
-  },
-
+  // ✅ 유지: B
   B_PAPER_BOLD: {
-    name: "B 종이카드(진한 제목)",
+    name: "종이카드(진한 제목)",
     frameMargin: 36,
     frameR: 60,
     photoVail: true,
@@ -247,8 +320,6 @@ const THEMES = {
     titleAlign: "center",
     titleBaseSize: 102,
     sticker: { w: 190, h: 190, offsetX: 10, offsetY: -110, rotateDeg: -8 },
-
-    // ✅ 분리 텍스트 레이아웃
     text: {
       title: { y: 0.43, align: "center", size: 102 },
       subtitle: { y: 0.66, align: "center", size: 54, alpha: 0.9 },
@@ -256,36 +327,9 @@ const THEMES = {
     },
   },
 
-  C_MINIMAL: {
-    name: "C 미니멀(깔끔)",
-    frameMargin: 52,
-    frameR: 54,
-    photoVail: false,
-    bottomGrad: false,
-    cardFill: "rgba(255, 255, 255, 0.92)",
-    cardDash: false,
-    titleDefaultColor: "#2a211b",
-    titleAlign: "left",
-    titleBaseSize: 86,
-    sticker: { w: 160, h: 160, offsetX: 0, offsetY: -85, rotateDeg: -10 },
-  },
-
-  D_DARK: {
-    name: "D 다크(영화/밤)",
-    frameMargin: 40,
-    frameR: 60,
-    photoVail: false,
-    bottomGrad: true,
-    cardFill: "rgba(0,0,0,0.40)",
-    cardDash: false,
-    titleDefaultColor: "#ffffff",
-    titleAlign: "left",
-    titleBaseSize: 86,
-    sticker: { w: 170, h: 170, offsetX: 0, offsetY: -90, rotateDeg: -8 },
-  },
-
+  // ✅ 유지: E
   E_POSTER: {
-    name: "E 포스터(공연)",
+    name: "검정 뒷배경(포스터)",
     frameMargin: 40,
     frameR: 60,
     photoVail: false,
@@ -296,8 +340,6 @@ const THEMES = {
     titleAlign: "center",
     titleBaseSize: 92,
     sticker: { w: 180, h: 180, offsetX: 0, offsetY: -95, rotateDeg: -10 },
-
-    // ✅ 분리 텍스트 레이아웃
     text: {
       title: { y: 0.40, align: "center", size: 92 },
       subtitle: { y: 0.62, align: "center", size: 52, alpha: 0.92 },
@@ -305,19 +347,120 @@ const THEMES = {
     },
   },
 
-  F_TOP_TITLE: {
-    name: "F 상단 타이틀(가벼움)",
-    frameMargin: 56,
-    frameR: 54,
+  // ✅ 신규 1) POLAROID
+  G_POLAROID: {
+    name: "폴라로이드(감성사진)",
+    frameMargin: 54,
+    frameR: 44,
     photoVail: true,
     bottomGrad: false,
-    cardFill: "rgba(255, 247, 235, 0.92)",
-    cardDash: true,
-    titleDefaultColor: "#3a2f24",
+    cardFill: "rgba(255,255,255,0.96)",
+    cardDash: false,
+    titleDefaultColor: "#2f1d12",
     titleAlign: "center",
-    titleBaseSize: 88,
-    sticker: { w: 170, h: 170, offsetX: 0, offsetY: -90, rotateDeg: -10 },
+    titleBaseSize: 92,
     cardPos: "mid",
+    cardH: 320,
+    decorations: [{ type: "tape" }],
+    text: {
+      title: { y: 0.38, align: "center", size: 92 },
+      subtitle: { y: 0.64, align: "center", size: 50, alpha: 0.92 },
+      location: { y: 0.86, align: "center", size: 40, alpha: 0.88 },
+    },
+    sticker: { w: 180, h: 180, offsetX: 0, offsetY: -95, rotateDeg: -8 },
+  },
+
+  // ✅ 신규 2) TOP_BANNER
+  H_TOP_BANNER: {
+    name: "상단 배너(제목 강조)",
+    frameMargin: 40,
+    frameR: 60,
+    photoVail: true,
+    bottomGrad: true,
+    cardFill: "rgba(255, 247, 235, 0.94)",
+    cardDash: false,
+    titleDefaultColor: "#2f1d12",
+    titleAlign: "center",
+    titleBaseSize: 102,
+    cardPos: "top",
+    cardH: 240,
+    banner: true,
+    text: {
+      title: { y: 0.50, align: "center", size: 102 },
+      subtitle: { y: 0.84, align: "center", size: 46, alpha: 0.92 },
+      location: { y: 0.98, align: "center", size: 36, alpha: 0.85 },
+    },
+    sticker: { w: 170, h: 170, offsetX: 0, offsetY: -90, rotateDeg: -10 },
+  },
+
+  // ✅ 신규 3) SIDE_TAG
+  I_SIDE_TAG: {
+    name: "사이드 태그(놀거리/여행)",
+    frameMargin: 44,
+    frameR: 58,
+    photoVail: true,
+    bottomGrad: true,
+    cardFill: "rgba(255, 255, 255, 0.90)",
+    cardDash: true,
+    titleDefaultColor: "#2a211b",
+    titleAlign: "left",
+    titleBaseSize: 88,
+    cardPos: "bottom",
+    cardH: 280,
+    sideTag: true,
+    text: {
+      title: { y: 0.42, align: "left", size: 88 },
+      subtitle: { y: 0.70, align: "left", size: 48, alpha: 0.9 },
+      location: { y: 0.90, align: "left", size: 38, alpha: 0.85 },
+    },
+    sticker: { w: 160, h: 160, offsetX: 0, offsetY: -88, rotateDeg: -12 },
+  },
+
+  // ✅ 신규 4) STAMP_CORNER
+  J_STAMP_CORNER: {
+    name: "코너 스탬프(기록장)",
+    frameMargin: 40,
+    frameR: 60,
+    photoVail: true,
+    bottomGrad: true,
+    cardFill: "rgba(255, 247, 235, 0.92)",
+    cardDash: false,
+    titleDefaultColor: "#2f1d12",
+    titleAlign: "center",
+    titleBaseSize: 96,
+    cardPos: "bottom",
+    cardH: 280,
+    cornerStamp: true,
+    noteLines: true, // ✅ 줄노트 ON
+    text: {
+      title: { y: 0.44, align: "center", size: 96 },
+      subtitle: { y: 0.70, align: "center", size: 52, alpha: 0.9 },
+      location: { y: 0.90, align: "center", size: 40, alpha: 0.86 },
+    },
+    sticker: { w: 180, h: 180, offsetX: 0, offsetY: -95, rotateDeg: -8 },
+  },
+
+  // ✅ 신규 5) GLASS_BAR
+  K_GLASS_BAR: {
+    name: "유리바(모던/깔끔)",
+    frameMargin: 40,
+    frameR: 60,
+    photoVail: false,
+    bottomGrad: false,
+    cardFill: "rgba(255,255,255,0.30)",
+    cardDash: false,
+    titleDefaultColor: "#ffffff",
+    titleAlign: "center",
+    titleBaseSize: 92,
+    cardPos: "bottom",
+    cardH: 260,
+    glass: true,
+    text: {
+      title: { y: 0.44, align: "center", size: 92 },
+      subtitle: { y: 0.70, align: "center", size: 48, alpha: 0.92 },
+      location: { y: 0.90, align: "center", size: 38, alpha: 0.9 },
+    },
+    sticker: { w: 170, h: 170, offsetX: 0, offsetY: -92, rotateDeg: -10 },
   },
 };
 
@@ -333,8 +476,8 @@ const ThumbnailMaker = () => {
   const [selectedFont, setSelectedFont] = useState("YPairing");
   const [result, setResult] = useState(null);
 
-  // ✅ 템플릿 선택
-  const [themeKey, setThemeKey] = useState("A_PAPER_CLASSIC");
+  // ✅ 템플릿 선택 (A 제거 → B로 기본)
+  const [themeKey, setThemeKey] = useState("B_PAPER_BOLD");
 
   // ✅ 폰트 크기(사용자 조절) - 제목 사이즈
   const [titleSize, setTitleSize] = useState(94);
@@ -494,7 +637,7 @@ const ThumbnailMaker = () => {
     canvas.height = 1080;
 
     const style = categories[category];
-    const theme = THEMES[themeKey] || THEMES.A_PAPER_CLASSIC;
+    const theme = THEMES[themeKey] || THEMES.B_PAPER_BOLD;
 
     // === 0) 전체 배경
     ctx.fillStyle = style.bg || "#f2e8d8";
@@ -528,15 +671,15 @@ const ThumbnailMaker = () => {
     );
     ctx.clip();
 
-    const size = Math.min(image.width, image.height);
-    const sx = (image.width - size) / 2;
-    const sy = (image.height - size) / 2;
+    const crop = Math.min(image.width, image.height);
+    const sx = (image.width - crop) / 2;
+    const sy = (image.height - crop) / 2;
     ctx.drawImage(
       image,
       sx,
       sy,
-      size,
-      size,
+      crop,
+      crop,
       frameX + 10,
       frameY + 10,
       frameW - 20,
@@ -606,11 +749,21 @@ const ThumbnailMaker = () => {
     // === 3) 카드(텍스트 영역)
     const cardX = frameX + 45;
     const cardW = frameW - 90;
-    const cardH = 280;
+
+    // ✅ 테마별 카드 높이/위치
+    const cardH = theme.cardH ?? 280;
+
     const defaultCardY = frameY + frameH - cardH - 55;
-    const cardY = theme.cardPos === "mid" ? frameY + 560 : defaultCardY;
+    const cardY =
+      theme.cardPos === "mid"
+        ? frameY + 560
+        : theme.cardPos === "top"
+        ? frameY + 160
+        : defaultCardY;
+
     const cardR = 30;
 
+    // 카드 본체
     ctx.save();
     ctx.shadowColor = "rgba(0,0,0,0.18)";
     ctx.shadowBlur = 22;
@@ -620,6 +773,7 @@ const ThumbnailMaker = () => {
     ctx.fill();
     ctx.restore();
 
+    // 카드 점선
     if (theme.cardDash) {
       ctx.save();
       roundedRectPath(ctx, cardX, cardY, cardW, cardH, cardR);
@@ -627,6 +781,78 @@ const ThumbnailMaker = () => {
       ctx.lineWidth = 3;
       ctx.setLineDash([10, 10]);
       ctx.stroke();
+      ctx.restore();
+    }
+
+    // ✅ 카드 장식(테마 옵션) — 카드 직후 렌더
+    if (theme.banner) {
+      drawBanner(
+        ctx,
+        frameX + 60,
+        frameY + 110,
+        frameW - 120,
+        160,
+        "rgba(255,247,235,0.92)"
+      );
+    }
+
+    if (theme.noteLines) {
+      drawNoteLines(ctx, cardX, cardY, cardW, cardH);
+    }
+
+    if (theme.cornerStamp) {
+      drawCornerStamp(
+        ctx,
+        cardX + cardW - 70,
+        cardY + cardH - 36,
+        "RECORD",
+        "rgba(120,60,40,0.50)",
+        selectedFont
+      );
+    }
+
+    if (theme.decorations?.some((d) => d.type === "tape")) {
+      drawTape(ctx, cardX + 40, cardY - 26, 220, 70, -8, "rgba(255,255,255,0.55)");
+      drawTape(ctx, cardX + cardW - 260, cardY - 30, 220, 70, 6, "rgba(255,255,255,0.50)");
+    }
+
+    // ✅ 유리바 테마: 테두리 하이라이트
+    if (theme.glass) {
+      ctx.save();
+      roundedRectPath(ctx, cardX, cardY, cardW, cardH, cardR);
+      ctx.strokeStyle = "rgba(255,255,255,0.35)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // ✅ 사이드 태그(세로 리본)
+    if (theme.sideTag) {
+      const tagW = 90;
+      const tagX = frameX + frameW - tagW - 28;
+      const tagY = frameY + 160;
+      const tagH = 420;
+
+      ctx.save();
+      ctx.shadowColor = "rgba(0,0,0,0.18)";
+      ctx.shadowBlur = 18;
+      ctx.shadowOffsetY = 10;
+
+      roundedRectPath(ctx, tagX, tagY, tagW, tagH, 26);
+      ctx.fillStyle = "rgba(255,247,235,0.92)";
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.translate(tagX + tagW / 2, tagY + tagH / 2);
+      ctx.rotate(-Math.PI / 2);
+
+      ctx.font = `900 44px ${selectedFont}`;
+      ctx.fillStyle = "rgba(70,55,45,0.85)";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(style.label, 0, 0);
+
       ctx.restore();
     }
 
@@ -811,7 +1037,11 @@ const ThumbnailMaker = () => {
     ctx.textAlign = "right";
     ctx.textBaseline = "alphabetic";
     ctx.fillStyle = "rgba(255,255,255,0.92)";
-    ctx.fillText(`지나의 ${style.label} 기록장`, frameX + frameW - 20, frameY + frameH - 22);
+    ctx.fillText(
+      `지나의 ${style.label} 기록장`,
+      frameX + frameW - 20,
+      frameY + frameH - 22
+    );
 
     setResult(canvas.toDataURL("image/jpeg", 0.92));
   };
@@ -1028,7 +1258,7 @@ const ThumbnailMaker = () => {
         <div className="input-item">
           <label>9. 부제</label>
           <input
-            className="custom-select"
+            className="custom-input"
             value={subtitle}
             onChange={(e) => setSubtitle(e.target.value)}
             placeholder="예: 오늘은 감성 데이트 코스"
@@ -1038,7 +1268,7 @@ const ThumbnailMaker = () => {
         <div className="input-item">
           <label>10. 위치</label>
           <input
-            className="custom-select"
+            className="custom-input"
             value={locationText}
             onChange={(e) => setLocationText(e.target.value)}
             placeholder="예: 📍 서울 홍대입구역 2번 출구"
