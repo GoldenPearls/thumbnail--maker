@@ -519,6 +519,12 @@ const ThumbnailMaker = () => {
   const [subtitle, setSubtitle] = useState("");
   const [locationText, setLocationText] = useState("");
 
+  // ✅ 부제 커스텀
+  const [subY, setSubY] = useState(0.66);            // 기본: 좀 위로
+  const [subSize, setSubSize] = useState(44);        // 기본: 적당히 작게
+  const [subColor, setSubColor] = useState("#3a2a21"); // 기본색(사용자가 바꿀 수 있음)
+  const [subShadowEnabled, setSubShadowEnabled] = useState(false); // ✅ 기본: 체크 해제
+
   const [selectedFont, setSelectedFont] = useState("YPairing");
   const [result, setResult] = useState(null);
 
@@ -969,6 +975,39 @@ const ThumbnailMaker = () => {
         return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
       };
 
+      const getLuma = (hex) => {
+        const rgb = hexToRgb(hex);
+        if (!rgb) return 200;
+        return 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
+      };
+      
+      // ✅ 부제 그림자: 배경/텍스트에 따라 자동으로 "은은하게"
+      const getAutoSubShadowStyle = ({ bgHex, textHex }) => {
+        const bgL = getLuma(bgHex);
+        const textL = getLuma(textHex);
+      
+        const bgIsDark = bgL < 110;
+        const textIsDark = textL < 110;
+      
+        // 눈부신 흰 글로우 금지 → "잉크 섀도우만" 아주 은은하게
+        if (bgIsDark && !textIsDark) {
+          // 어두운 배경 + 밝은 글씨
+          return {
+            inkShadow: true,
+            inkColor: "rgba(0,0,0,0.35)",
+            inkBlur: 6,
+            inkOffsetY: 3,
+          };
+        }
+        // 밝은 배경 + 어두운 글씨
+        return {
+          inkShadow: true,
+          inkColor: "rgba(0,0,0,0.18)",
+          inkBlur: 4,
+          inkOffsetY: 2,
+        };
+      };
+
       const hlFill = toRgba(hlColor);
 
       let fills = null;
@@ -1014,25 +1053,35 @@ const ThumbnailMaker = () => {
       });
     }
 
-    // --- 4-2) 부제
+   // --- 4-2) 부제
     {
-      const size = clamp(themeText.subtitle?.size ?? 54, 28, 80);
+      // ✅ 사용자 커스텀 우선 적용
+      const size = clamp(subSize ?? (themeText.subtitle?.size ?? 54), 24, 80);
       const lineHeight = size + 10;
-
+    
       ctx.font = `800 ${size}px ${selectedFont}`;
       ctx.textAlign =
         subAlign === "left" ? "left" : subAlign === "right" ? "right" : "center";
-
-      drawFairyMultiline(ctx, subLines, subX, subY, lineHeight, {
-        fill: subFill,
-        glow: false,
-        inkShadow: true,
-        inkColor: "rgba(0,0,0,0.22)",
-        inkBlur: 5,
-        inkOffsetY: 4,
+    
+      // ✅ 부제 색: 사용자가 지정한 값 우선
+      const fill = (subColor && subColor.trim()) ? subColor : subFill;
+    
+      // ✅ 기본은 그림자 OFF, 체크하면 자동으로 "은은한 그림자"만
+      const shadowStyle = subShadowEnabled
+        ? getAutoSubShadowStyle({ bgHex: style?.bg || "#ffffff", textHex: fill })
+        : { inkShadow: false };
+    
+      drawFairyMultiline(ctx, subLines, subX, subY * cardH + cardY, lineHeight, {
+        fill,
+        glow: false, // ✅ 눈부신 글로우 금지(부제는 깔끔하게)
+        inkShadow: shadowStyle.inkShadow,
+        inkColor: shadowStyle.inkColor,
+        inkBlur: shadowStyle.inkBlur,
+        inkOffsetY: shadowStyle.inkOffsetY,
         alpha: clamp(themeText.subtitle?.alpha ?? 0.9, 0, 1),
       });
     }
+
 
     // --- 4-3) 위치
     {
@@ -1315,6 +1364,68 @@ const ThumbnailMaker = () => {
             placeholder="예: 오늘은 감성 데이트 코스"
           />
         </div>
+
+        <hr className="divider" />
+        <div className="input-item">
+          <label>부제 위치/스타일</label>
+        
+          <div className="row">
+            <div className="slider-row" style={{ flex: 1 }}>
+              <span className="hint subtle">부제 위치(Y)</span>
+              <input
+                className="range"
+                type="range"
+                min="0.58"
+                max="0.74"
+                step="0.01"
+                value={subY}
+                onChange={(e) => setSubY(Number(e.target.value))}
+              />
+              <span className="hint subtle">{subY.toFixed(2)}</span>
+            </div>
+          </div>
+        
+          <div className="row">
+            <div className="slider-row" style={{ flex: 1 }}>
+              <span className="hint subtle">부제 크기</span>
+              <input
+                className="range"
+                type="range"
+                min="28"
+                max="70"
+                value={subSize}
+                onChange={(e) => setSubSize(Number(e.target.value))}
+              />
+              <span className="hint subtle">{subSize}px</span>
+            </div>
+          </div>
+        
+          <div className="row">
+            <div className="color-row">
+              <input type="color" value={subColor} onChange={(e) => setSubColor(e.target.value)} />
+              <div className="hint subtle">부제 색</div>
+              <button className="mini-btn" onClick={() => setSubColor("#3a2a21")} type="button">
+                기본색
+              </button>
+            </div>
+          </div>
+        
+          <div className="row">
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={subShadowEnabled}
+                onChange={(e) => setSubShadowEnabled(e.target.checked)}
+              />
+              부제 그림자(체크하면 자동으로 은은하게)
+            </label>
+          </div>
+        
+          <div className="hint subtle">
+            * 기본은 OFF. 체크 시 배경 밝기에 맞춰 자동으로 “눈부시지 않게” 들어가요.
+          </div>
+        </div>
+      
 
         <div className="input-item">
           <label>10. 위치</label>
