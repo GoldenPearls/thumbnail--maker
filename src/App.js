@@ -321,163 +321,192 @@ const drawFairyMultiline = (ctx, lines, x, yCenter, lineHeight, style) => {
 };
 
 /* -----------------------------
-   ✅ 템플릿 (B/E 유지 + 신규 5종)
+   ✅ 템플릿 
 ------------------------------ */
 const THEMES = {
-  // ✅ 유지: B
-  B_PAPER_BOLD: {
-    name: "종이카드(진한 제목)",
+    B_PAPER_BOLD: {
+    name: "B 종이카드(베스트/따뜻)",
     frameMargin: 36,
     frameR: 60,
     photoVail: true,
     bottomGrad: true,
-    cardFill: "rgba(255, 247, 235, 0.96)",
+    cardFill: "rgba(255, 250, 242, 0.96)",
     cardDash: true,
-    titleDefaultColor: "#2f1d12",
+    titleDefaultColor: "#2b1a10",
     titleAlign: "center",
     titleBaseSize: 102,
-    sticker: { w: 190, h: 190, offsetX: 10, offsetY: -110, rotateDeg: -8 },
+    cardPos: "bottom",
+    cardH: 290,
     text: {
       title: { y: 0.43, align: "center", size: 102 },
-      subtitle: { y: 0.66, align: "center", size: 54, alpha: 0.9 },
-      location: { y: 0.86, align: "center", size: 42, alpha: 0.85 },
+      subtitle: { y: 0.66, align: "center", size: 54, alpha: 0.92 },
+      location: { y: 0.86, align: "center", size: 42, alpha: 0.86 },
     },
+    sticker: { w: 190, h: 190, offsetX: 10, offsetY: -110, rotateDeg: -8 },
   },
 
-  // ✅ 유지: E
+  // ✅ 유지 + 더 시네마틱하게
   E_POSTER: {
-    name: "검정 뒷배경(포스터)",
+    name: "E 다크 포스터(공연/영화)",
     frameMargin: 40,
-    frameR: 60,
+    frameR: 62,
     photoVail: false,
     bottomGrad: true,
-    cardFill: "rgba(0,0,0,0.33)",
+    cardFill: "rgba(0,0,0,0.36)",
     cardDash: false,
     titleDefaultColor: "#fff7e8",
     titleAlign: "center",
-    titleBaseSize: 92,
-    sticker: { w: 180, h: 180, offsetX: 0, offsetY: -95, rotateDeg: -10 },
+    titleBaseSize: 94,
+    cardPos: "bottom",
+    cardH: 270,
     text: {
-      title: { y: 0.40, align: "center", size: 92 },
-      subtitle: { y: 0.62, align: "center", size: 52, alpha: 0.92 },
-      location: { y: 0.82, align: "center", size: 40, alpha: 0.9 },
+      title: { y: 0.42, align: "center", size: 94 },
+      subtitle: { y: 0.68, align: "center", size: 52, alpha: 0.92 },
+      location: { y: 0.88, align: "center", size: 40, alpha: 0.9 },
     },
+    sticker: { w: 180, h: 180, offsetX: 0, offsetY: -95, rotateDeg: -10 },
   },
 
-  // ✅ 신규 1) POLAROID
+  /* =============================
+     ✅ 신규: 감성/고급 6종
+  ============================== */
+
+  // 1) 폴라로이드: 가장 예쁘게 나오게 톤 조정
   G_POLAROID: {
-    name: "폴라로이드(감성사진)",
+    name: "G 폴라로이드(감성/테이프)",
     frameMargin: 54,
     frameR: 44,
     photoVail: true,
     bottomGrad: false,
-    cardFill: "rgba(255,255,255,0.96)",
+    cardFill: "rgba(255,255,255,0.97)",
     cardDash: false,
-    titleDefaultColor: "#2f1d12",
+    titleDefaultColor: "#2b1a10",
     titleAlign: "center",
     titleBaseSize: 92,
     cardPos: "mid",
-    cardH: 320,
+    cardH: 330,
     decorations: [{ type: "tape" }],
     text: {
       title: { y: 0.38, align: "center", size: 92 },
       subtitle: { y: 0.64, align: "center", size: 50, alpha: 0.92 },
-      location: { y: 0.86, align: "center", size: 40, alpha: 0.88 },
+      location: { y: 0.87, align: "center", size: 40, alpha: 0.88 },
     },
-    sticker: { w: 180, h: 180, offsetX: 0, offsetY: -95, rotateDeg: -8 },
+    sticker: { w: 175, h: 175, offsetX: 0, offsetY: -92, rotateDeg: -8 },
   },
 
-  // ✅ 신규 2) TOP_BANNER
+  // 2) 상단 배너: "사진+제목" 느낌이 가장 깔끔
   H_TOP_BANNER: {
-    name: "상단 배너(제목 강조)",
+    name: "H 상단 배너(제목 또렷)",
     frameMargin: 40,
-    frameR: 60,
+    frameR: 62,
     photoVail: true,
     bottomGrad: true,
-    cardFill: "rgba(255, 247, 235, 0.94)",
+    cardFill: "rgba(255, 252, 246, 0.92)",
     cardDash: false,
-    titleDefaultColor: "#2f1d12",
+    titleDefaultColor: "#25160f",
     titleAlign: "center",
-    titleBaseSize: 102,
+    titleBaseSize: 104,
     cardPos: "top",
     cardH: 240,
     banner: true,
     text: {
-      title: { y: 0.50, align: "center", size: 102 },
+      title: { y: 0.50, align: "center", size: 104 },
       subtitle: { y: 0.84, align: "center", size: 46, alpha: 0.92 },
-      location: { y: 0.98, align: "center", size: 36, alpha: 0.85 },
+      location: { y: 0.98, align: "center", size: 36, alpha: 0.86 },
     },
-    sticker: { w: 170, h: 170, offsetX: 0, offsetY: -90, rotateDeg: -10 },
+    sticker: { w: 165, h: 165, offsetX: 0, offsetY: -88, rotateDeg: -10 },
   },
 
-  // ✅ 신규 3) SIDE_TAG
-  I_SIDE_TAG: {
-    name: "사이드 태그(놀거리/여행)",
+  // 3) 미니 카드: 여백이 살아서 고급스럽게 보이는 템플릿
+  L_MINI_CARD: {
+    name: "L 미니 카드(깔끔/여백미)",
     frameMargin: 44,
-    frameR: 58,
+    frameR: 64,
     photoVail: true,
     bottomGrad: true,
-    cardFill: "rgba(255, 255, 255, 0.90)",
-    cardDash: true,
-    titleDefaultColor: "#2a211b",
+    cardFill: "rgba(255,255,255,0.86)",
+    cardDash: false,
+    titleDefaultColor: "#25160f",
     titleAlign: "left",
-    titleBaseSize: 88,
+    titleBaseSize: 86,
     cardPos: "bottom",
-    cardH: 280,
+    cardH: 230,
+    text: {
+      title: { y: 0.46, align: "left", size: 86 },
+      subtitle: { y: 0.74, align: "left", size: 46, alpha: 0.9 },
+      location: { y: 0.92, align: "left", size: 36, alpha: 0.85 },
+    },
+    sticker: { w: 150, h: 150, offsetX: 0, offsetY: -82, rotateDeg: -10 },
+  },
+
+  // 4) 사이드 태그: 놀거리/여행용 시그니처
+  I_SIDE_TAG: {
+    name: "I 사이드 태그(놀거리/여행)",
+    frameMargin: 44,
+    frameR: 62,
+    photoVail: true,
+    bottomGrad: true,
+    cardFill: "rgba(255, 255, 255, 0.88)",
+    cardDash: true,
+    titleDefaultColor: "#25160f",
+    titleAlign: "left",
+    titleBaseSize: 86,
+    cardPos: "bottom",
+    cardH: 270,
     sideTag: true,
     text: {
-      title: { y: 0.42, align: "left", size: 88 },
-      subtitle: { y: 0.70, align: "left", size: 48, alpha: 0.9 },
-      location: { y: 0.90, align: "left", size: 38, alpha: 0.85 },
+      title: { y: 0.43, align: "left", size: 86 },
+      subtitle: { y: 0.70, align: "left", size: 46, alpha: 0.9 },
+      location: { y: 0.90, align: "left", size: 36, alpha: 0.85 },
     },
-    sticker: { w: 160, h: 160, offsetX: 0, offsetY: -88, rotateDeg: -12 },
+    sticker: { w: 155, h: 155, offsetX: 0, offsetY: -84, rotateDeg: -12 },
   },
 
-  // ✅ 신규 4) STAMP_CORNER
-  J_STAMP_CORNER: {
-    name: "코너 스탬프(기록장)",
+  // 5) 스탬프+노트라인: 기록장 느낌을 진짜 예쁘게
+  J_STAMP_NOTE: {
+    name: "J 기록장(스탬프+줄노트)",
     frameMargin: 40,
-    frameR: 60,
+    frameR: 64,
     photoVail: true,
     bottomGrad: true,
-    cardFill: "rgba(255, 247, 235, 0.92)",
+    cardFill: "rgba(255, 250, 242, 0.92)",
     cardDash: false,
-    titleDefaultColor: "#2f1d12",
+    titleDefaultColor: "#2b1a10",
     titleAlign: "center",
     titleBaseSize: 96,
     cardPos: "bottom",
-    cardH: 280,
+    cardH: 290,
     cornerStamp: true,
-    noteLines: true, // ✅ 줄노트 ON
+    noteLines: true,
     text: {
       title: { y: 0.44, align: "center", size: 96 },
       subtitle: { y: 0.70, align: "center", size: 52, alpha: 0.9 },
       location: { y: 0.90, align: "center", size: 40, alpha: 0.86 },
     },
-    sticker: { w: 180, h: 180, offsetX: 0, offsetY: -95, rotateDeg: -8 },
+    sticker: { w: 175, h: 175, offsetX: 0, offsetY: -92, rotateDeg: -8 },
   },
 
-  // ✅ 신규 5) GLASS_BAR
+  // 6) 유리바 모던: 사진이 화려할수록 예쁘게 먹는 템플릿
   K_GLASS_BAR: {
-    name: "유리바(모던/깔끔)",
+    name: "K 유리바(모던/세련)",
     frameMargin: 40,
-    frameR: 60,
+    frameR: 62,
     photoVail: false,
-    bottomGrad: false,
-    cardFill: "rgba(255,255,255,0.30)",
+    bottomGrad: true, // ✅ 유리바는 하단 그라데이션이 더 예쁨
+    cardFill: "rgba(20,20,20,0.22)", // ✅ 흰 유리보다 다크 유리가 더 고급
     cardDash: false,
     titleDefaultColor: "#ffffff",
     titleAlign: "center",
     titleBaseSize: 92,
     cardPos: "bottom",
-    cardH: 260,
+    cardH: 250,
     glass: true,
     text: {
       title: { y: 0.44, align: "center", size: 92 },
       subtitle: { y: 0.70, align: "center", size: 48, alpha: 0.92 },
       location: { y: 0.90, align: "center", size: 38, alpha: 0.9 },
     },
-    sticker: { w: 170, h: 170, offsetX: 0, offsetY: -92, rotateDeg: -10 },
+    sticker: { w: 165, h: 165, offsetX: 0, offsetY: -88, rotateDeg: -10 },
   },
 };
 
