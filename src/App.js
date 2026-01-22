@@ -1,3 +1,9 @@
+/* ===========================
+   App.js (통파일)
+   - 제목 / 부제 / 위치 완전 분리
+   - B / E 템플릿에 text 레이아웃 적용
+=========================== */
+
 const { useState, useRef, useEffect } = React;
 
 /** 이미지 로더 */
@@ -101,10 +107,7 @@ const drawTextHighlight = (
     padY = 16,
     radius = 26,
     fill = "rgba(255,255,255,0.86)",
-
-    // ✅ 라인별 색(우선)
     fills = null,
-
     mode = "pill", // "pill" | "stripe"
     stripeSkew = 10,
     shadow = true,
@@ -153,18 +156,69 @@ const drawTextHighlight = (
   });
 };
 
-const drawMultilineText = (ctx, lines, x, yCenter, lineHeight) => {
+/* -----------------------------
+   ✅ "동화" 텍스트(Glow+Ink) 렌더
+------------------------------ */
+const drawFairyLine = (
+  ctx,
+  text,
+  x,
+  y,
+  {
+    fill = "#2f1d12",
+    glow = true,
+    glowColor = "rgba(255,255,255,0.85)",
+    glowBlur = 16,
+    inkShadow = true,
+    inkColor = "rgba(0,0,0,0.28)",
+    inkBlur = 6,
+    inkOffsetY = 4,
+    alpha = 1,
+  } = {}
+) => {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+
+  if (glow) {
+    ctx.save();
+    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = glowBlur;
+    ctx.shadowOffsetY = -1;
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+
+  if (inkShadow) {
+    ctx.save();
+    ctx.fillStyle = "rgba(70,55,45,0.35)";
+    ctx.shadowColor = inkColor;
+    ctx.shadowBlur = inkBlur;
+    ctx.shadowOffsetY = inkOffsetY;
+    ctx.fillText(text, x, y + 2);
+    ctx.restore();
+  }
+
+  ctx.save();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = fill;
+  ctx.fillText(text, x, y);
+  ctx.restore();
+
+  ctx.restore();
+};
+
+const drawFairyMultiline = (ctx, lines, x, yCenter, lineHeight, style) => {
   const totalH = lines.length * lineHeight;
   const startY = yCenter - totalH / 2 + lineHeight / 2;
-
   lines.forEach((line, i) => {
     const y = startY + i * lineHeight;
-    ctx.fillText(line, x, y);
+    drawFairyLine(ctx, line, x, y, style);
   });
 };
 
 /* -----------------------------
-   템플릿 6종 (select)
+   템플릿 (B/E 유지 + 텍스트 레이아웃 추가)
 ------------------------------ */
 const THEMES = {
   A_PAPER_CLASSIC: {
@@ -193,6 +247,13 @@ const THEMES = {
     titleAlign: "center",
     titleBaseSize: 102,
     sticker: { w: 190, h: 190, offsetX: 10, offsetY: -110, rotateDeg: -8 },
+
+    // ✅ 분리 텍스트 레이아웃
+    text: {
+      title: { y: 0.43, align: "center", size: 102 },
+      subtitle: { y: 0.66, align: "center", size: 54, alpha: 0.9 },
+      location: { y: 0.86, align: "center", size: 42, alpha: 0.85 },
+    },
   },
 
   C_MINIMAL: {
@@ -235,6 +296,13 @@ const THEMES = {
     titleAlign: "center",
     titleBaseSize: 92,
     sticker: { w: 180, h: 180, offsetX: 0, offsetY: -95, rotateDeg: -10 },
+
+    // ✅ 분리 텍스트 레이아웃
+    text: {
+      title: { y: 0.40, align: "center", size: 92 },
+      subtitle: { y: 0.62, align: "center", size: 52, alpha: 0.92 },
+      location: { y: 0.82, align: "center", size: 40, alpha: 0.9 },
+    },
   },
 
   F_TOP_TITLE: {
@@ -256,14 +324,19 @@ const THEMES = {
 const ThumbnailMaker = () => {
   const [image, setImage] = useState(null);
   const [category, setCategory] = useState("🍜 음식");
+
+  // ✅ 완전 분리: 제목/부제/위치
   const [title, setTitle] = useState("");
+  const [subtitle, setSubtitle] = useState("");
+  const [locationText, setLocationText] = useState("");
+
   const [selectedFont, setSelectedFont] = useState("YPairing");
   const [result, setResult] = useState(null);
 
   // ✅ 템플릿 선택
   const [themeKey, setThemeKey] = useState("A_PAPER_CLASSIC");
 
-  // ✅ 폰트 크기(사용자 조절)
+  // ✅ 폰트 크기(사용자 조절) - 제목 사이즈
   const [titleSize, setTitleSize] = useState(94);
 
   // ✅ 글씨 색(사용자 지정) - 비어 있으면 템플릿 기본색
@@ -285,23 +358,71 @@ const ThumbnailMaker = () => {
   const canvasRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  /**
-   * 스티커 경로
-   */
+  /** 스티커 경로 */
   const STICKER_BASE = "./assets";
 
-  /** 카테고리: 라벨(좌상단), 포인트색(점), 스티커 */
+  /** 카테고리 */
   const categories = {
-    "🎡 놀거리": { dot: "#E76F51", bg: "#FFF3EC", label: "놀거리노트", sticker: `${STICKER_BASE}/play.png` },
-    "☕ 카페": { dot: "#8D6E63", bg: "#F7F1EA", label: "카페노트", sticker: `${STICKER_BASE}/cafe.png` },
-    "🍰 디저트": { dot: "#E3A008", bg: "#FFF2CC", label: "디저트일기", sticker: `${STICKER_BASE}/dessert.png` },
-    "💄 뷰티": { dot: "#FF5C8A", bg: "#FFF0F6", label: "뷰티노트", sticker: `${STICKER_BASE}/beauty.png` },
-    "✈️ 여행": { dot: "#457B9D", bg: "#EEF6FF", label: "여행기록", sticker: `${STICKER_BASE}/travel.png` },
-    "📦 제품리뷰": { dot: "#6C757D", bg: "#F3F4F6", label: "사용후기", sticker: `${STICKER_BASE}/product.png` },
-    "🎭 연극": { dot: "#6D597A", bg: "#F5F0FF", label: "공연기록", sticker: `${STICKER_BASE}/theater.png` },
-    "🍜 음식": { dot: "#D62828", bg: "#FFF0EE", label: "먹데이트", sticker: `${STICKER_BASE}/food.png` },
-    "🎬 영화": { dot: "#355070", bg: "#EEF1FF", label: "영화노트", sticker: `${STICKER_BASE}/movie.png` },
-    "🍷 술": { dot: "#2EC4B6", bg: "#E9FBFF", label: "오늘의 한 잔", sticker: `${STICKER_BASE}/drink.png` },
+    "🎡 놀거리": {
+      dot: "#E76F51",
+      bg: "#FFF3EC",
+      label: "놀거리노트",
+      sticker: `${STICKER_BASE}/play.png`,
+    },
+    "☕ 카페": {
+      dot: "#8D6E63",
+      bg: "#F7F1EA",
+      label: "카페노트",
+      sticker: `${STICKER_BASE}/cafe.png`,
+    },
+    "🍰 디저트": {
+      dot: "#E3A008",
+      bg: "#FFF2CC",
+      label: "디저트일기",
+      sticker: `${STICKER_BASE}/dessert.png`,
+    },
+    "💄 뷰티": {
+      dot: "#FF5C8A",
+      bg: "#FFF0F6",
+      label: "뷰티노트",
+      sticker: `${STICKER_BASE}/beauty.png`,
+    },
+    "✈️ 여행": {
+      dot: "#457B9D",
+      bg: "#EEF6FF",
+      label: "여행기록",
+      sticker: `${STICKER_BASE}/travel.png`,
+    },
+    "📦 제품리뷰": {
+      dot: "#6C757D",
+      bg: "#F3F4F6",
+      label: "사용후기",
+      sticker: `${STICKER_BASE}/product.png`,
+    },
+    "🎭 연극": {
+      dot: "#6D597A",
+      bg: "#F5F0FF",
+      label: "공연기록",
+      sticker: `${STICKER_BASE}/theater.png`,
+    },
+    "🍜 음식": {
+      dot: "#D62828",
+      bg: "#FFF0EE",
+      label: "먹데이트",
+      sticker: `${STICKER_BASE}/food.png`,
+    },
+    "🎬 영화": {
+      dot: "#355070",
+      bg: "#EEF1FF",
+      label: "영화노트",
+      sticker: `${STICKER_BASE}/movie.png`,
+    },
+    "🍷 술": {
+      dot: "#2EC4B6",
+      bg: "#E9FBFF",
+      label: "오늘의 한 잔",
+      sticker: `${STICKER_BASE}/drink.png`,
+    },
   };
 
   const fonts = [
@@ -321,18 +442,16 @@ const ThumbnailMaker = () => {
     { name: "넥슨 배찌체", value: "NexonBazzi" },
   ];
 
-  // ✅ 템플릿 바뀌면 폰트 크기 기본값도 같이 바뀌게
+  // ✅ 템플릿 바뀌면 제목 폰트 기본값도 같이
   useEffect(() => {
     const t = THEMES[themeKey];
     if (t?.titleBaseSize) setTitleSize(t.titleBaseSize);
-    // setTitleColor(""); // 원하면 주석 해제
   }, [themeKey]);
 
   // ✅ 카테고리 바뀌면: 하이라이트 프리셋 자동 세팅
   useEffect(() => {
     const style = categories[category];
 
-    // 단색 하이라이트 기본색: bg 기반
     setHlColor(style?.bg || "#FFF7EB");
 
     const preset = HIGHLIGHT_PRESETS[category];
@@ -344,11 +463,10 @@ const ThumbnailMaker = () => {
       setHlLine3(preset.line1);
     }
 
-    // (선택) 커스텀 안 했을 때만 글씨색 자동 추천
     if (!titleColor?.trim()) {
       if (category === "🎬 영화") setTitleColor("#FFFFFF");
       else if (category === "📦 제품리뷰") setTitleColor("#2A2A2A");
-      else setTitleColor(""); // 템플릿 기본색으로
+      else setTitleColor("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category]);
@@ -400,13 +518,30 @@ const ThumbnailMaker = () => {
     ctx.restore();
 
     ctx.save();
-    roundedRectPath(ctx, frameX + 10, frameY + 10, frameW - 20, frameH - 20, frameR - 10);
+    roundedRectPath(
+      ctx,
+      frameX + 10,
+      frameY + 10,
+      frameW - 20,
+      frameH - 20,
+      frameR - 10
+    );
     ctx.clip();
 
     const size = Math.min(image.width, image.height);
     const sx = (image.width - size) / 2;
     const sy = (image.height - size) / 2;
-    ctx.drawImage(image, sx, sy, size, size, frameX + 10, frameY + 10, frameW - 20, frameH - 20);
+    ctx.drawImage(
+      image,
+      sx,
+      sy,
+      size,
+      size,
+      frameX + 10,
+      frameY + 10,
+      frameW - 20,
+      frameH - 20
+    );
 
     if (theme.photoVail) {
       const warm = ctx.createLinearGradient(0, frameY, 0, frameY + frameH);
@@ -426,7 +561,7 @@ const ThumbnailMaker = () => {
 
     ctx.restore(); // clip
 
-    // === 2) 좌상단 라벨 (배경 자동 + 너비 자동)
+    // === 2) 좌상단 라벨
     const badgeX = frameX + 35;
     const badgeY = frameY + 35;
     const badgeH = 86;
@@ -462,9 +597,13 @@ const ThumbnailMaker = () => {
     ctx.font = `900 44px ${selectedFont}`;
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
-    ctx.fillText(style.label, badgeX + leftPad + dotR * 2 + gap, badgeY + badgeH / 2 + 2);
+    ctx.fillText(
+      style.label,
+      badgeX + leftPad + dotR * 2 + gap,
+      badgeY + badgeH / 2 + 2
+    );
 
-    // === 3) 하단 종이 카드(제목 영역)
+    // === 3) 카드(텍스트 영역)
     const cardX = frameX + 45;
     const cardW = frameW - 90;
     const cardH = 280;
@@ -491,67 +630,153 @@ const ThumbnailMaker = () => {
       ctx.restore();
     }
 
-    // === 4) 제목 (✅ 하이라이트 먼저 → 글씨)
-    const lines = getLines(title);
-    const baseSize = clamp(titleSize, 60, 130);
+    // === 4) 텍스트 (제목/부제/위치 완전 분리)
+    const themeText =
+      theme.text || {
+        title: { y: 0.45, align: theme.titleAlign || "center", size: titleSize },
+        subtitle: { y: 0.68, align: theme.titleAlign || "center", size: 52, alpha: 0.9 },
+        location: { y: 0.86, align: theme.titleAlign || "center", size: 40, alpha: 0.85 },
+      };
 
-    const fillColor = titleColor?.trim()
+    const titleLines = getLines(title);
+    const subLines = getLines(subtitle);
+    const locLines = getLines(locationText);
+
+    const getAlignX = (align) => {
+      if (align === "left") return cardX + 70;
+      if (align === "right") return cardX + cardW - 70;
+      return cardX + cardW / 2;
+    };
+
+    const titleAlign = themeText.title?.align || theme.titleAlign || "center";
+    const subAlign = themeText.subtitle?.align || titleAlign;
+    const locAlign = themeText.location?.align || titleAlign;
+
+    const titleX = getAlignX(titleAlign);
+    const subX = getAlignX(subAlign);
+    const locX = getAlignX(locAlign);
+
+    const titleY = cardY + cardH * (themeText.title?.y ?? 0.45);
+    const subY = cardY + cardH * (themeText.subtitle?.y ?? 0.68);
+    const locY = cardY + cardH * (themeText.location?.y ?? 0.86);
+
+    const titleFill = titleColor?.trim()
       ? titleColor
       : theme.titleDefaultColor || "#4a2f1f";
 
-    const align = theme.titleAlign || "center";
-    const textX = align === "left" ? cardX + 70 : cardX + cardW / 2;
-    const textY = cardY + cardH / 2 + 6;
-    const lineHeight = baseSize + 12;
+    const subFill =
+      category === "🎬 영화" || themeKey === "E_POSTER"
+        ? "rgba(255, 247, 232, 0.95)"
+        : "rgba(70, 55, 45, 0.92)";
+
+    const locFill =
+      category === "🎬 영화" || themeKey === "E_POSTER"
+        ? "rgba(255, 247, 232, 0.90)"
+        : "rgba(85, 70, 58, 0.88)";
 
     ctx.save();
     ctx.textBaseline = "middle";
-    ctx.font = `900 ${baseSize}px ${selectedFont}`;
-    ctx.textAlign = align === "left" ? "left" : "center";
 
-    // 하이라이트 색 준비
-    const alpha = clamp(hlAlpha, 0, 1);
-    const toRgba = (hex) => {
-      const rgb = hexToRgb(hex) || { r: 255, g: 247, b: 235 };
-      return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
-    };
+    // --- 4-1) 제목: 하이라이트 + 동화 텍스트
+    {
+      const baseSize = clamp(themeText.title?.size ?? titleSize, 60, 130);
+      const lineHeight = baseSize + 12;
 
-    const hlFill = toRgba(hlColor);
+      ctx.font = `900 ${baseSize}px ${selectedFont}`;
+      ctx.textAlign =
+        titleAlign === "left" ? "left" : titleAlign === "right" ? "right" : "center";
 
-    let fills = null;
-    if (hlPerLine) {
-      if (hlAutoTwoTone) {
-        fills = lines.map((_, i) => (i % 2 === 0 ? toRgba(hlLine1) : toRgba(hlLine2)));
-      } else {
-        const manual = [hlLine1, hlLine2, hlLine3].map(toRgba);
-        fills = lines.map((_, i) => manual[i] || hlFill);
+      const alpha = clamp(hlAlpha, 0, 1);
+      const toRgba = (hex) => {
+        const rgb = hexToRgb(hex) || { r: 255, g: 247, b: 235 };
+        return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+      };
+
+      const hlFill = toRgba(hlColor);
+
+      let fills = null;
+      if (hlPerLine) {
+        if (hlAutoTwoTone) {
+          fills = titleLines.map((_, i) =>
+            i % 2 === 0 ? toRgba(hlLine1) : toRgba(hlLine2)
+          );
+        } else {
+          const manual = [hlLine1, hlLine2, hlLine3].map(toRgba);
+          fills = titleLines.map((_, i) => manual[i] || hlFill);
+        }
       }
-    }
 
-    // ✅ 하이라이트 먼저
-    if (hlEnabled && lines.length > 0) {
-      drawTextHighlight(ctx, {
-        lines,
-        x: textX,
-        yCenter: textY,
-        lineHeight,
-        align: align === "left" ? "left" : "center",
-        padX: 30,
-        padY: 18,
-        radius: 28,
-        fill: hlFill,
-        fills,
-        mode: hlMode,
-        stripeSkew: 14,
-        shadow: true,
+      if (hlEnabled && titleLines.length > 0) {
+        drawTextHighlight(ctx, {
+          lines: titleLines,
+          x: titleX,
+          yCenter: titleY,
+          lineHeight,
+          align: titleAlign,
+          padX: 30,
+          padY: 18,
+          radius: 28,
+          fill: hlFill,
+          fills,
+          mode: hlMode,
+          stripeSkew: 14,
+          shadow: true,
+        });
+      }
+
+      drawFairyMultiline(ctx, titleLines, titleX, titleY, lineHeight, {
+        fill: titleFill,
+        glow: true,
+        glowColor: "rgba(255,255,255,0.85)",
+        glowBlur: 18,
+        inkShadow: true,
+        inkColor: "rgba(0,0,0,0.25)",
+        inkBlur: 7,
+        inkOffsetY: 5,
+        alpha: 1,
       });
     }
 
-    // ✅ 텍스트
-    ctx.fillStyle = fillColor;
-    if (lines.length > 0) {
-      drawMultilineText(ctx, lines, textX, textY, lineHeight);
+    // --- 4-2) 부제
+    {
+      const size = clamp(themeText.subtitle?.size ?? 54, 28, 80);
+      const lineHeight = size + 10;
+
+      ctx.font = `800 ${size}px ${selectedFont}`;
+      ctx.textAlign =
+        subAlign === "left" ? "left" : subAlign === "right" ? "right" : "center";
+
+      drawFairyMultiline(ctx, subLines, subX, subY, lineHeight, {
+        fill: subFill,
+        glow: false,
+        inkShadow: true,
+        inkColor: "rgba(0,0,0,0.22)",
+        inkBlur: 5,
+        inkOffsetY: 4,
+        alpha: clamp(themeText.subtitle?.alpha ?? 0.9, 0, 1),
+      });
     }
+
+    // --- 4-3) 위치
+    {
+      const size = clamp(themeText.location?.size ?? 42, 22, 70);
+      const lineHeight = size + 8;
+
+      ctx.font = `700 ${size}px ${selectedFont}`;
+      ctx.textAlign =
+        locAlign === "left" ? "left" : locAlign === "right" ? "right" : "center";
+
+      drawFairyMultiline(ctx, locLines, locX, locY, lineHeight, {
+        fill: locFill,
+        glow: false,
+        inkShadow: true,
+        inkColor: "rgba(0,0,0,0.20)",
+        inkBlur: 4,
+        inkOffsetY: 3,
+        alpha: clamp(themeText.location?.alpha ?? 0.85, 0, 1),
+      });
+    }
+
     ctx.restore();
 
     // === 5) 스티커 PNG
@@ -603,7 +828,13 @@ const ThumbnailMaker = () => {
           <div className="file-box" onClick={() => fileInputRef.current.click()}>
             {image ? "📸 사진 선택됨" : "📁 사진을 선택하세요"}
           </div>
-          <input ref={fileInputRef} type="file" hidden onChange={handleImageUpload} accept="image/*" />
+          <input
+            ref={fileInputRef}
+            type="file"
+            hidden
+            onChange={handleImageUpload}
+            accept="image/*"
+          />
         </div>
 
         <div className="input-item">
@@ -624,7 +855,11 @@ const ThumbnailMaker = () => {
 
         <div className="input-item">
           <label>3. 템플릿</label>
-          <select className="custom-select" value={themeKey} onChange={(e) => setThemeKey(e.target.value)}>
+          <select
+            className="custom-select"
+            value={themeKey}
+            onChange={(e) => setThemeKey(e.target.value)}
+          >
             {Object.entries(THEMES).map(([k, t]) => (
               <option key={k} value={k}>
                 {t.name}
@@ -635,7 +870,11 @@ const ThumbnailMaker = () => {
 
         <div className="input-item">
           <label>4. 폰트 선택</label>
-          <select className="custom-select" value={selectedFont} onChange={(e) => setSelectedFont(e.target.value)}>
+          <select
+            className="custom-select"
+            value={selectedFont}
+            onChange={(e) => setSelectedFont(e.target.value)}
+          >
             {fonts.map((f) => (
               <option key={f.value} value={f.value}>
                 {f.name}
@@ -674,17 +913,24 @@ const ThumbnailMaker = () => {
 
         <hr className="divider" />
 
-        {/* ✅ 하이라이트 UI */}
         <div className="input-item">
           <label>7. 제목 뒤 배경(하이라이트/리본)</label>
 
           <div className="row">
             <label className="check">
-              <input type="checkbox" checked={hlEnabled} onChange={(e) => setHlEnabled(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={hlEnabled}
+                onChange={(e) => setHlEnabled(e.target.checked)}
+              />
               사용
             </label>
 
-            <select className="custom-select" value={hlMode} onChange={(e) => setHlMode(e.target.value)}>
+            <select
+              className="custom-select"
+              value={hlMode}
+              onChange={(e) => setHlMode(e.target.value)}
+            >
               <option value="pill">둥근 배경(pill)</option>
               <option value="stripe">리본/스트랩(stripe)</option>
             </select>
@@ -713,7 +959,11 @@ const ThumbnailMaker = () => {
 
           <div className="row">
             <label className="check">
-              <input type="checkbox" checked={hlPerLine} onChange={(e) => setHlPerLine(e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={hlPerLine}
+                onChange={(e) => setHlPerLine(e.target.checked)}
+              />
               라인별 사용
             </label>
 
@@ -731,12 +981,22 @@ const ThumbnailMaker = () => {
           <div className="row3">
             <div className="color-col">
               <div className="hint subtle">1줄 색</div>
-              <input type="color" value={hlLine1} onChange={(e) => setHlLine1(e.target.value)} disabled={!hlPerLine} />
+              <input
+                type="color"
+                value={hlLine1}
+                onChange={(e) => setHlLine1(e.target.value)}
+                disabled={!hlPerLine}
+              />
             </div>
 
             <div className="color-col">
               <div className="hint subtle">2줄 색</div>
-              <input type="color" value={hlLine2} onChange={(e) => setHlLine2(e.target.value)} disabled={!hlPerLine} />
+              <input
+                type="color"
+                value={hlLine2}
+                onChange={(e) => setHlLine2(e.target.value)}
+                disabled={!hlPerLine}
+              />
             </div>
 
             <div className="color-col">
@@ -754,13 +1014,34 @@ const ThumbnailMaker = () => {
           <div className="hint subtle">* 카테고리를 바꾸면 자동 2톤 프리셋이 기본으로 세팅돼요.</div>
         </div>
 
+        {/* ✅ 완전 분리 입력 */}
         <div className="input-item">
-          <label>8. 제목 입력</label>
+          <label>8. 제목</label>
           <textarea
             className="custom-textarea"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="제목을 입력하세요 (엔터로 줄바꿈)"
+          />
+        </div>
+
+        <div className="input-item">
+          <label>9. 부제</label>
+          <input
+            className="custom-select"
+            value={subtitle}
+            onChange={(e) => setSubtitle(e.target.value)}
+            placeholder="예: 오늘은 감성 데이트 코스"
+          />
+        </div>
+
+        <div className="input-item">
+          <label>10. 위치</label>
+          <input
+            className="custom-select"
+            value={locationText}
+            onChange={(e) => setLocationText(e.target.value)}
+            placeholder="예: 📍 서울 홍대입구역 2번 출구"
           />
         </div>
 
@@ -772,7 +1053,11 @@ const ThumbnailMaker = () => {
       <div className="panel preview">
         <h2 className="panel-title">📸 결과 확인</h2>
         <div className="canvas-wrapper">
-          {result ? <img src={result} alt="thumbnail" className="result-img" /> : <div className="placeholder-box">사진을 먼저 업로드해주세요</div>}
+          {result ? (
+            <img src={result} alt="thumbnail" className="result-img" />
+          ) : (
+            <div className="placeholder-box">사진을 먼저 업로드해주세요</div>
+          )}
         </div>
 
         {result && (
