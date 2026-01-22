@@ -832,7 +832,6 @@ const ThumbnailMaker = () => {
         selectedFont
       );
     }
-    }
 
     if (theme.decorations?.some((d) => d.type === "tape")) {
       drawTape(ctx, cardX + 40, cardY - 26, 220, 70, -8, "rgba(255,255,255,0.55)");
