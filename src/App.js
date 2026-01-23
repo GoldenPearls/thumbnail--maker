@@ -81,7 +81,6 @@ const STAMP_TEXT_BY_CATEGORY = {
   "🍷 술": "CHEERS",
 };
 
-
 /* -----------------------------
    ✅ 하이라이트/리본 그리기
 ------------------------------ */
@@ -321,10 +320,10 @@ const drawFairyMultiline = (ctx, lines, x, yCenter, lineHeight, style) => {
 };
 
 /* -----------------------------
-   ✅ 템플릿 
+   ✅ 템플릿 (부제 제거 버전)
 ------------------------------ */
 const THEMES = {
-    B_PAPER_BOLD: {
+  B_PAPER_BOLD: {
     name: "B 종이카드(베스트/따뜻)",
     frameMargin: 36,
     frameR: 60,
@@ -338,14 +337,12 @@ const THEMES = {
     cardPos: "bottom",
     cardH: 290,
     text: {
-      title: { y: 0.43, align: "center", size: 102 },
-      subtitle: { y: 0.66, align: "center", size: 54, alpha: 0.92 },
-      location: { y: 0.86, align: "center", size: 42, alpha: 0.86 },
+      title: { y: 0.52, align: "center", size: 102 },
+      location: { y: 0.84, align: "center", size: 42, alpha: 0.86 },
     },
-    sticker: { w: 190, h: 190, offsetX: 10, offsetY: -110, rotateDeg: -8 },
+    sticker: { w: 190, h: 190, offsetX: 10, offsetY: -96, rotateDeg: -8 },
   },
 
-  // ✅ 유지 + 더 시네마틱하게
   E_POSTER: {
     name: "E 다크 포스터(공연/영화)",
     frameMargin: 40,
@@ -360,18 +357,15 @@ const THEMES = {
     cardPos: "bottom",
     cardH: 270,
     text: {
-      title: { y: 0.42, align: "center", size: 94 },
-      subtitle: { y: 0.68, align: "center", size: 52, alpha: 0.92 },
-      location: { y: 0.88, align: "center", size: 40, alpha: 0.9 },
+      title: { y: 0.52, align: "center", size: 94 },
+      location: { y: 0.86, align: "center", size: 40, alpha: 0.9 },
     },
-    sticker: { w: 180, h: 180, offsetX: 0, offsetY: -95, rotateDeg: -10 },
+    sticker: { w: 180, h: 180, offsetX: 0, offsetY: -82, rotateDeg: -10 },
   },
 
   /* =============================
      ✅ 신규: 감성/고급 6종
   ============================== */
-
-  // 1) 폴라로이드: 가장 예쁘게 나오게 톤 조정
   G_POLAROID: {
     name: "G 폴라로이드(감성/테이프)",
     frameMargin: 54,
@@ -387,14 +381,12 @@ const THEMES = {
     cardH: 330,
     decorations: [{ type: "tape" }],
     text: {
-      title: { y: 0.38, align: "center", size: 92 },
-      subtitle: { y: 0.64, align: "center", size: 50, alpha: 0.92 },
-      location: { y: 0.87, align: "center", size: 40, alpha: 0.88 },
+      title: { y: 0.50, align: "center", size: 92 },
+      location: { y: 0.86, align: "center", size: 40, alpha: 0.88 },
     },
-    sticker: { w: 175, h: 175, offsetX: 0, offsetY: -92, rotateDeg: -8 },
+    sticker: { w: 175, h: 175, offsetX: 0, offsetY: -78, rotateDeg: -8 },
   },
 
-  // 2) 상단 배너: "사진+제목" 느낌이 가장 깔끔
   H_TOP_BANNER: {
     name: "H 상단 배너(제목 또렷)",
     frameMargin: 40,
@@ -410,14 +402,12 @@ const THEMES = {
     cardH: 240,
     banner: true,
     text: {
-      title: { y: 0.50, align: "center", size: 104 },
-      subtitle: { y: 0.84, align: "center", size: 46, alpha: 0.92 },
-      location: { y: 0.98, align: "center", size: 36, alpha: 0.86 },
+      title: { y: 0.56, align: "center", size: 104 },
+      location: { y: 0.90, align: "center", size: 36, alpha: 0.86 },
     },
-    sticker: { w: 165, h: 165, offsetX: 0, offsetY: -88, rotateDeg: -10 },
+    sticker: { w: 165, h: 165, offsetX: 0, offsetY: -72, rotateDeg: -10 },
   },
 
-  // 3) 미니 카드: 여백이 살아서 고급스럽게 보이는 템플릿
   L_MINI_CARD: {
     name: "L 미니 카드(깔끔/여백미)",
     frameMargin: 44,
@@ -432,14 +422,12 @@ const THEMES = {
     cardPos: "bottom",
     cardH: 230,
     text: {
-      title: { y: 0.46, align: "left", size: 86 },
-      subtitle: { y: 0.74, align: "left", size: 46, alpha: 0.9 },
-      location: { y: 0.92, align: "left", size: 36, alpha: 0.85 },
+      title: { y: 0.54, align: "left", size: 86 },
+      location: { y: 0.88, align: "left", size: 36, alpha: 0.85 },
     },
-    sticker: { w: 150, h: 150, offsetX: 0, offsetY: -82, rotateDeg: -10 },
+    sticker: { w: 150, h: 150, offsetX: 0, offsetY: -66, rotateDeg: -10 },
   },
 
-  // 4) 사이드 태그: 놀거리/여행용 시그니처
   I_SIDE_TAG: {
     name: "I 사이드 태그(놀거리/여행)",
     frameMargin: 44,
@@ -455,14 +443,12 @@ const THEMES = {
     cardH: 270,
     sideTag: true,
     text: {
-      title: { y: 0.43, align: "left", size: 86 },
-      subtitle: { y: 0.70, align: "left", size: 46, alpha: 0.9 },
-      location: { y: 0.90, align: "left", size: 36, alpha: 0.85 },
+      title: { y: 0.52, align: "left", size: 86 },
+      location: { y: 0.86, align: "left", size: 36, alpha: 0.85 },
     },
-    sticker: { w: 155, h: 155, offsetX: 0, offsetY: -84, rotateDeg: -12 },
+    sticker: { w: 155, h: 155, offsetX: 0, offsetY: -70, rotateDeg: -12 },
   },
 
-  // 5) 스탬프+노트라인: 기록장 느낌을 진짜 예쁘게
   J_STAMP_NOTE: {
     name: "J 기록장(스탬프+줄노트)",
     frameMargin: 40,
@@ -479,21 +465,19 @@ const THEMES = {
     cornerStamp: true,
     noteLines: true,
     text: {
-      title: { y: 0.44, align: "center", size: 96 },
-      subtitle: { y: 0.70, align: "center", size: 52, alpha: 0.9 },
-      location: { y: 0.90, align: "center", size: 40, alpha: 0.86 },
+      title: { y: 0.52, align: "center", size: 96 },
+      location: { y: 0.86, align: "center", size: 40, alpha: 0.86 },
     },
-    sticker: { w: 175, h: 175, offsetX: 0, offsetY: -92, rotateDeg: -8 },
+    sticker: { w: 175, h: 175, offsetX: 0, offsetY: -78, rotateDeg: -8 },
   },
 
-  // 6) 유리바 모던: 사진이 화려할수록 예쁘게 먹는 템플릿
   K_GLASS_BAR: {
     name: "K 유리바(모던/세련)",
     frameMargin: 40,
     frameR: 62,
     photoVail: false,
-    bottomGrad: true, // ✅ 유리바는 하단 그라데이션이 더 예쁨
-    cardFill: "rgba(20,20,20,0.22)", // ✅ 흰 유리보다 다크 유리가 더 고급
+    bottomGrad: true,
+    cardFill: "rgba(20,20,20,0.22)",
     cardDash: false,
     titleDefaultColor: "#ffffff",
     titleAlign: "center",
@@ -502,11 +486,10 @@ const THEMES = {
     cardH: 250,
     glass: true,
     text: {
-      title: { y: 0.44, align: "center", size: 92 },
-      subtitle: { y: 0.70, align: "center", size: 48, alpha: 0.92 },
-      location: { y: 0.90, align: "center", size: 38, alpha: 0.9 },
+      title: { y: 0.52, align: "center", size: 92 },
+      location: { y: 0.86, align: "center", size: 38, alpha: 0.9 },
     },
-    sticker: { w: 165, h: 165, offsetX: 0, offsetY: -88, rotateDeg: -10 },
+    sticker: { w: 165, h: 165, offsetX: 0, offsetY: -72, rotateDeg: -10 },
   },
 };
 
@@ -514,21 +497,14 @@ const ThumbnailMaker = () => {
   const [image, setImage] = useState(null);
   const [category, setCategory] = useState("🍜 음식");
 
-  // ✅ 완전 분리: 제목/부제/위치
+  // ✅ 제목/위치만 유지 (부제 제거)
   const [title, setTitle] = useState("");
-  const [subtitle, setSubtitle] = useState("");
   const [locationText, setLocationText] = useState("");
-
-  // ✅ 부제 커스텀
-  const [subY, setSubY] = useState(0.66);            // 기본: 좀 위로
-  const [subSize, setSubSize] = useState(44);        // 기본: 적당히 작게
-  const [subColor, setSubColor] = useState("#3a2a21"); // 기본색(사용자가 바꿀 수 있음)
-  const [subShadowEnabled, setSubShadowEnabled] = useState(false); // ✅ 기본: 체크 해제
 
   const [selectedFont, setSelectedFont] = useState("YPairing");
   const [result, setResult] = useState(null);
 
-  // ✅ 템플릿 선택 (A 제거 → B로 기본)
+  // ✅ 템플릿 선택
   const [themeKey, setThemeKey] = useState("B_PAPER_BOLD");
 
   // ✅ 폰트 크기(사용자 조절) - 제목 사이즈
@@ -854,10 +830,8 @@ const ThumbnailMaker = () => {
 
     if (theme.cornerStamp) {
       const stampText =
-        STAMP_TEXT_BY_CATEGORY[category] ||
-        style?.label ||
-        "RECORD";
-    
+        STAMP_TEXT_BY_CATEGORY[category] || style?.label || "RECORD";
+
       drawCornerStamp(
         ctx,
         cardX + cardW - 70,
@@ -869,8 +843,24 @@ const ThumbnailMaker = () => {
     }
 
     if (theme.decorations?.some((d) => d.type === "tape")) {
-      drawTape(ctx, cardX + 40, cardY - 26, 220, 70, -8, "rgba(255,255,255,0.55)");
-      drawTape(ctx, cardX + cardW - 260, cardY - 30, 220, 70, 6, "rgba(255,255,255,0.50)");
+      drawTape(
+        ctx,
+        cardX + 40,
+        cardY - 26,
+        220,
+        70,
+        -8,
+        "rgba(255,255,255,0.55)"
+      );
+      drawTape(
+        ctx,
+        cardX + cardW - 260,
+        cardY - 30,
+        220,
+        70,
+        6,
+        "rgba(255,255,255,0.50)"
+      );
     }
 
     // ✅ 유리바 테마: 테두리 하이라이트
@@ -913,16 +903,14 @@ const ThumbnailMaker = () => {
       ctx.restore();
     }
 
-    // === 4) 텍스트 (제목/부제/위치 완전 분리)
+    // === 4) 텍스트 (부제 제거: 제목/위치)
     const themeText =
       theme.text || {
-        title: { y: 0.45, align: theme.titleAlign || "center", size: titleSize },
-        subtitle: { y: 0.68, align: theme.titleAlign || "center", size: 52, alpha: 0.9 },
-        location: { y: 0.86, align: theme.titleAlign || "center", size: 40, alpha: 0.85 },
+        title: { y: 0.52, align: theme.titleAlign || "center", size: titleSize },
+        location: { y: 0.84, align: theme.titleAlign || "center", size: 40, alpha: 0.85 },
       };
 
     const titleLines = getLines(title);
-    const subLines = getLines(subtitle);
     const locLines = getLines(locationText);
 
     const getAlignX = (align) => {
@@ -932,25 +920,17 @@ const ThumbnailMaker = () => {
     };
 
     const titleAlign = themeText.title?.align || theme.titleAlign || "center";
-    const subAlign = themeText.subtitle?.align || titleAlign;
     const locAlign = themeText.location?.align || titleAlign;
 
     const titleX = getAlignX(titleAlign);
-    const subX = getAlignX(subAlign);
     const locX = getAlignX(locAlign);
 
-    const titleY = cardY + cardH * (themeText.title?.y ?? 0.45);
-    const subY = cardY + cardH * (themeText.subtitle?.y ?? 0.68);
-    const locY = cardY + cardH * (themeText.location?.y ?? 0.86);
+    const titleY = cardY + cardH * (themeText.title?.y ?? 0.52);
+    const locY = cardY + cardH * (themeText.location?.y ?? 0.84);
 
     const titleFill = titleColor?.trim()
       ? titleColor
       : theme.titleDefaultColor || "#4a2f1f";
-
-    const subFill =
-      category === "🎬 영화" || themeKey === "E_POSTER"
-        ? "rgba(255, 247, 232, 0.95)"
-        : "rgba(70, 55, 45, 0.92)";
 
     const locFill =
       category === "🎬 영화" || themeKey === "E_POSTER"
@@ -973,39 +953,6 @@ const ThumbnailMaker = () => {
       const toRgba = (hex) => {
         const rgb = hexToRgb(hex) || { r: 255, g: 247, b: 235 };
         return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
-      };
-
-      const getLuma = (hex) => {
-        const rgb = hexToRgb(hex);
-        if (!rgb) return 200;
-        return 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
-      };
-      
-      // ✅ 부제 그림자: 배경/텍스트에 따라 자동으로 "은은하게"
-      const getAutoSubShadowStyle = ({ bgHex, textHex }) => {
-        const bgL = getLuma(bgHex);
-        const textL = getLuma(textHex);
-      
-        const bgIsDark = bgL < 110;
-        const textIsDark = textL < 110;
-      
-        // 눈부신 흰 글로우 금지 → "잉크 섀도우만" 아주 은은하게
-        if (bgIsDark && !textIsDark) {
-          // 어두운 배경 + 밝은 글씨
-          return {
-            inkShadow: true,
-            inkColor: "rgba(0,0,0,0.35)",
-            inkBlur: 6,
-            inkOffsetY: 3,
-          };
-        }
-        // 밝은 배경 + 어두운 글씨
-        return {
-          inkShadow: true,
-          inkColor: "rgba(0,0,0,0.18)",
-          inkBlur: 4,
-          inkOffsetY: 2,
-        };
       };
 
       const hlFill = toRgba(hlColor);
@@ -1053,37 +1000,7 @@ const ThumbnailMaker = () => {
       });
     }
 
-   // --- 4-2) 부제
-    {
-      // ✅ 사용자 커스텀 우선 적용
-      const size = clamp(subSize ?? (themeText.subtitle?.size ?? 54), 24, 80);
-      const lineHeight = size + 10;
-    
-      ctx.font = `800 ${size}px ${selectedFont}`;
-      ctx.textAlign =
-        subAlign === "left" ? "left" : subAlign === "right" ? "right" : "center";
-    
-      // ✅ 부제 색: 사용자가 지정한 값 우선
-      const fill = (subColor && subColor.trim()) ? subColor : subFill;
-    
-      // ✅ 기본은 그림자 OFF, 체크하면 자동으로 "은은한 그림자"만
-      const shadowStyle = subShadowEnabled
-        ? getAutoSubShadowStyle({ bgHex: style?.bg || "#ffffff", textHex: fill })
-        : { inkShadow: false };
-    
-      drawFairyMultiline(ctx, subLines, subX, subY * cardH + cardY, lineHeight, {
-        fill,
-        glow: false, // ✅ 눈부신 글로우 금지(부제는 깔끔하게)
-        inkShadow: shadowStyle.inkShadow,
-        inkColor: shadowStyle.inkColor,
-        inkBlur: shadowStyle.inkBlur,
-        inkOffsetY: shadowStyle.inkOffsetY,
-        alpha: clamp(themeText.subtitle?.alpha ?? 0.9, 0, 1),
-      });
-    }
-
-
-    // --- 4-3) 위치
+    // --- 4-2) 위치
     {
       const size = clamp(themeText.location?.size ?? 42, 22, 70);
       const lineHeight = size + 8;
@@ -1344,7 +1261,6 @@ const ThumbnailMaker = () => {
           <div className="hint subtle">* 카테고리를 바꾸면 자동 2톤 프리셋이 기본으로 세팅돼요.</div>
         </div>
 
-        {/* ✅ 완전 분리 입력 */}
         <div className="input-item">
           <label>8. 제목</label>
           <textarea
@@ -1356,79 +1272,7 @@ const ThumbnailMaker = () => {
         </div>
 
         <div className="input-item">
-          <label>9. 부제</label>
-          <input
-            className="custom-input"
-            value={subtitle}
-            onChange={(e) => setSubtitle(e.target.value)}
-            placeholder="예: 오늘은 감성 데이트 코스"
-          />
-        </div>
-
-        <hr className="divider" />
-        <div className="input-item">
-          <label>부제 위치/스타일</label>
-        
-          <div className="row">
-            <div className="slider-row" style={{ flex: 1 }}>
-              <span className="hint subtle">부제 위치(Y)</span>
-              <input
-                className="range"
-                type="range"
-                min="0.58"
-                max="0.74"
-                step="0.01"
-                value={subY}
-                onChange={(e) => setSubY(Number(e.target.value))}
-              />
-              <span className="hint subtle">{subY.toFixed(2)}</span>
-            </div>
-          </div>
-        
-          <div className="row">
-            <div className="slider-row" style={{ flex: 1 }}>
-              <span className="hint subtle">부제 크기</span>
-              <input
-                className="range"
-                type="range"
-                min="28"
-                max="70"
-                value={subSize}
-                onChange={(e) => setSubSize(Number(e.target.value))}
-              />
-              <span className="hint subtle">{subSize}px</span>
-            </div>
-          </div>
-        
-          <div className="row">
-            <div className="color-row">
-              <input type="color" value={subColor} onChange={(e) => setSubColor(e.target.value)} />
-              <div className="hint subtle">부제 색</div>
-              <button className="mini-btn" onClick={() => setSubColor("#3a2a21")} type="button">
-                기본색
-              </button>
-            </div>
-          </div>
-        
-          <div className="row">
-            <label className="check">
-              <input
-                type="checkbox"
-                checked={subShadowEnabled}
-                onChange={(e) => setSubShadowEnabled(e.target.checked)}
-              />
-              부제 그림자(체크하면 자동으로 은은하게)
-            </label>
-          </div>
-        
-          <div className="hint subtle">
-            * 기본은 OFF. 체크 시 배경 밝기에 맞춰 자동으로 “눈부시지 않게” 들어가요.
-          </div>
-        </div>
-      
-
-        <div className="input-item">
-          <label>10. 위치</label>
+          <label>9. 위치</label>
           <input
             className="custom-input"
             value={locationText}
