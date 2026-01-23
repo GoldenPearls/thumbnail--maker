@@ -131,9 +131,6 @@ const drawTape = (
   ctx.restore();
 };
 
-// ✅ 제목 + 부제 공통 그림자 ON/OFF
-const [textShadowEnabled, setTextShadowEnabled] = useState(false);
-
 const drawBanner = (
   ctx,
   x,
@@ -499,6 +496,9 @@ const THEMES = {
 const ThumbnailMaker = () => {
   const [image, setImage] = useState(null);
   const [category, setCategory] = useState("🍜 음식");
+
+  // ✅ 제목 + 부제 공통 그림자 ON/OFF
+  const [textShadowEnabled, setTextShadowEnabled] = useState(false);
 
   // ✅ 제목/위치만 유지 (부제 제거)
   const [title, setTitle] = useState("");
