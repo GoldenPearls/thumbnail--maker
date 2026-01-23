@@ -131,6 +131,9 @@ const drawTape = (
   ctx.restore();
 };
 
+// ✅ 제목 + 부제 공통 그림자 ON/OFF
+const [textShadowEnabled, setTextShadowEnabled] = useState(false);
+
 const drawBanner = (
   ctx,
   x,
@@ -989,13 +992,13 @@ const ThumbnailMaker = () => {
 
       drawFairyMultiline(ctx, titleLines, titleX, titleY, lineHeight, {
         fill: titleFill,
-        glow: true,
-        glowColor: "rgba(255,255,255,0.85)",
-        glowBlur: 18,
-        inkShadow: true,
-        inkColor: "rgba(0,0,0,0.25)",
-        inkBlur: 7,
-        inkOffsetY: 5,
+        glow: textShadowEnabled,              // ✅ 체크박스 연동
+        glowColor: "rgba(255,255,255,0.55)",   // 눈부심 ↓
+        glowBlur: 12,
+        inkShadow: textShadowEnabled,
+        inkColor: "rgba(0,0,0,0.22)",
+        inkBlur: 5,
+        inkOffsetY: 4,
         alpha: 1,
       });
     }
@@ -1011,9 +1014,9 @@ const ThumbnailMaker = () => {
 
       drawFairyMultiline(ctx, locLines, locX, locY, lineHeight, {
         fill: locFill,
-        glow: false,
-        inkShadow: true,
-        inkColor: "rgba(0,0,0,0.20)",
+        glow: false,                           // ❌ glow 없음
+        inkShadow: textShadowEnabled,          // 그림자만 공유
+        inkColor: "rgba(0,0,0,0.18)",
         inkBlur: 4,
         inkOffsetY: 3,
         alpha: clamp(themeText.location?.alpha ?? 0.85, 0, 1),
@@ -1270,6 +1273,21 @@ const ThumbnailMaker = () => {
             placeholder="제목을 입력하세요 (엔터로 줄바꿈)"
           />
         </div>
+
+        <div className="input-item">
+          <label>텍스트 효과</label>
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={textShadowEnabled}
+              onChange={(e) => setTextShadowEnabled(e.target.checked)}
+            />
+            제목 · 위치 그림자 사용
+          </label>
+          <div className="hint subtle">
+            * 기본은 꺼짐, 켜면 부드럽게 자동 적용돼요
+          </div>
+        </div>   
 
         <div className="input-item">
           <label>9. 위치</label>
