@@ -559,7 +559,7 @@ const ThumbnailMaker = () => {
       dot: "#FF5C8A",
       bg: "#FFF0F6",
       label: "뷰티노트",
-      sticker: `${STICKER_BASE}/beauty.png`,
+      sticker: `${STICKER_BASE}/beauty3.png`,
     },
     "✈️ 여행": {
       dot: "#457B9D",
